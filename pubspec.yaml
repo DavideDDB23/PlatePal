@@ -1,0 +1,95 @@
+name: plate_pal
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  flutter_svg: ^2.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  uses-material-design: true
+  assets:
+    - assets/icons/
+    - assets/images/
+
+  fonts:
+    - family: SFProDisplay
+      fonts:
+        # Thin
+        - asset: assets/fonts/SF-Pro-Display-Thin.otf
+          weight: 100
+        - asset: assets/fonts/SF-Pro-Display-ThinItalic.otf
+          weight: 100
+          style: italic
+
+        # Ultralight
+        - asset: assets/fonts/SF-Pro-Display-Ultralight.otf
+          weight: 200
+        - asset: assets/fonts/SF-Pro-Display-UltralightItalic.otf
+          weight: 200
+          style: italic
+
+        # Light
+        - asset: assets/fonts/SF-Pro-Display-Light.otf
+          weight: 300
+        - asset: assets/fonts/SF-Pro-Display-LightItalic.otf
+          weight: 300
+          style: italic
+
+        # Regular (Normal)
+        - asset: assets/fonts/SF-Pro-Display-Regular.otf
+          weight: 400 # Corresponds to FontWeight.normal
+        - asset: assets/fonts/SF-Pro-Display-RegularItalic.otf
+          weight: 400
+          style: italic
+
+        # Medium
+        - asset: assets/fonts/SF-Pro-Display-Medium.otf
+          weight: 500
+        - asset: assets/fonts/SF-Pro-Display-MediumItalic.otf
+          weight: 500
+          style: italic
+
+        # Semibold
+        - asset: assets/fonts/SF-Pro-Display-Semibold.otf
+          weight: 600
+        - asset: assets/fonts/SF-Pro-Display-SemiboldItalic.otf
+          weight: 600
+          style: italic
+
+        # Bold
+        - asset: assets/fonts/SF-Pro-Display-Bold.otf
+          weight: 700 # Corresponds to FontWeight.bold
+        - asset: assets/fonts/SF-Pro-Display-BoldItalic.otf
+          weight: 700
+          style: italic
+
+        # Heavy
+        - asset: assets/fonts/SF-Pro-Display-Heavy.otf
+          weight: 800
+        - asset: assets/fonts/SF-Pro-Display-HeavyItalic.otf
+          weight: 800
+          style: italic
+
+        # Black
+        - asset: assets/fonts/SF-Pro-Display-Black.otf
+          weight: 900
+        - asset: assets/fonts/SF-Pro-Display-BlackItalic.otf
+          weight: 900
+          style: italic
