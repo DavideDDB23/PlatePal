@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Make sure this is imported
 import 'package:flutter_svg/flutter_svg.dart';
-// Ensure your import paths match your project structure
-// import 'package:plate_pal/models/meal_model.dart';
-// import 'package:plate_pal/utils/app_colors.dart';
-// import 'package:plate_pal/widgets/calorie_summary_card.dart';
-// import 'package:plate_pal/widgets/logged_meal_item.dart';
-// For the provided code snippet, I'll use the paths as given by you:
 import 'package:plate_pal/models/meal_model.dart';
 import 'package:plate_pal/utils/app_colors.dart';
 import 'package:plate_pal/widgets/calorie_summary_card.dart';
@@ -64,22 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   final List<Meal> _yesterdayMeals = [
-    Meal(
-        name: 'Oatmeal Berries',
-        imageUrls: ['assets/images/pancake.png'],
-        calories: 300,
-        proteinGrams: 10,
-        carbsGrams: 55,
-        fatsGrams: 5,
-        time: '08:30'),
-    Meal(
-        name: 'Tuna Sandwich',
-        imageUrls: ['assets/images/pancake.png'],
-        calories: 400,
-        proteinGrams: 25,
-        carbsGrams: 40,
-        fatsGrams: 15,
-        time: '13:00'),
+
   ];
 
   List<Meal> get _currentLoggedMeals =>
@@ -285,9 +264,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMealListView() {
     if (_currentLoggedMeals.isEmpty) {
-      return const Center(
-          child: Text("No meals logged for this day.",
-              style: TextStyle(color: AppColors.secondaryText)));
+      return Align( // Use Align instead of Center
+        alignment: const Alignment(0.0, -0.5), 
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            "No meals logged for this day 😔.",
+            style: TextStyle(color: AppColors.primaryText, fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
     return ListView.builder(
       controller: _scrollController,
