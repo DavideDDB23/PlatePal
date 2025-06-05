@@ -19,6 +19,9 @@ class _HomeScreenState extends State<HomeScreen> {
   late ScrollController _scrollController;
 
   final List<Meal> _todayMeals = [
+  ];
+
+  final List<Meal> _yesterdayMeals = [
     Meal(
       name: 'Pancake',
       imageUrls: ['assets/images/pancake.png', 'assets/images/pancake.png'],
@@ -37,28 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
       fatsGrams: 12,
       time: '12:57',
     ),
-    Meal(
-      name: 'Grilled Chicken',
-      imageUrls: ['assets/images/pancake.png', 'assets/images/pancake.png', 'assets/images/pancake.png', 'assets/images/pancake.png'],
-      calories: 350,
-      proteinGrams: 50,
-      carbsGrams: 5,
-      fatsGrams: 10,
-      time: '19:00',
-    ),
-    Meal(
-      name: 'Salmon',
-      imageUrls: ['assets/images/pancake.png'],
-      calories: 450,
-      proteinGrams: 40,
-      carbsGrams: 15,
-      fatsGrams: 25,
-      time: '20:15',
-    ),
-  ];
-
-  final List<Meal> _yesterdayMeals = [
-
   ];
 
   List<Meal> get _currentLoggedMeals =>
@@ -154,20 +135,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Stack( // Stack for list and bottom fade gradient
                     children: [
                       _buildMealListView(),
-                      _buildBottomFadeGradient(gradientEnd), // Pass the bottom color of main gradient
+                      _selectedDay == "Today" ? _buildBottomFadeGradientToday(gradientEnd) : _buildBottomFadeGradientYesterday(gradientEnd), 
                     ],
                   ),
                 ),
               ],
             ),
-            _buildFloatingActionButton(),
+
+            _selectedDay == "Today" ? _buildFloatingActionButton() : const SizedBox.shrink(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBottomFadeGradient(Color pageBottomColor) {
+  Widget _buildBottomFadeGradientToday(Color pageBottomColor) {
     return Positioned(
       bottom: 0,
       left: 0,
@@ -184,6 +166,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 pageBottomColor,
               ],
               stops: [0, 0.25, 0.35, 1],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomFadeGradientYesterday(Color pageBottomColor) {
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: IgnorePointer( // Makes the gradient non-interactive
+        child: Container(
+          height: 60.0, // Adjust height of the fade effect
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                pageBottomColor.withOpacity(0), 
+                pageBottomColor.withOpacity(1),
+                pageBottomColor,
+              ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
