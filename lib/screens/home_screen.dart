@@ -7,6 +7,8 @@ import 'package:plate_pal/widgets/calorie_summary_card.dart';
 import 'package:plate_pal/widgets/logged_meal_item.dart';
 import 'package:plate_pal/models/plate_model.dart';
 import 'package:plate_pal/screens/meal_detail_screen.dart';
+import 'package:plate_pal/screens/scanner_screen.dart'; 
+import 'package:plate_pal/slide_from_bottom_route.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -387,10 +389,11 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 80,
           child: FloatingActionButton(
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Camera button pressed!')),
-              );
-            },
+              Navigator.push(
+              context,
+              SlideFromBottomRoute(page: const ScannerScreen()),
+            );
+          },
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,
             elevation: 3.0,
