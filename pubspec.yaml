@@ -14,6 +14,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.1.0
   uuid: ^4.5.1
+  flutter_native_splash: ^2.4.6
 
 dev_dependencies:
   flutter_test:
@@ -94,3 +95,8 @@ flutter:
         - asset: assets/fonts/SF-Pro-Display-BlackItalic.otf
           weight: 900
           style: italic
+
+flutter_native_splash:
+  color: "#CECECE"
+  image: assets/images/splash.png
+  ios_content_mode: center

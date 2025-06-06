@@ -187,7 +187,7 @@ class _CalorieSummaryCardState extends State<CalorieSummaryCard> {
                   ),
                   Expanded(
                     child: MacroInfoWidget(
-                      iconAsset: 'assets/icons/avocado.svg', // Ensure this path is correct
+                      iconAsset: 'assets/icons/avocado-2.svg', // Ensure this path is correct
                       label: 'Fats',
                       value: '${widget.fatsGrams}g',
                       iconColor: AppColors.fatsColor,
