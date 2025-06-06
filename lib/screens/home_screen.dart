@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
     plates: [
       Plate(
         name: 'Fattoush Salad',
-        imageUrl: 'assets/images/pancake.jpg',
+        imageUrl: 'assets/images/pancake.png',
         calories: 153, proteinGrams: 12, carbsGrams: 12, fatsGrams: 12
       ),
     ],

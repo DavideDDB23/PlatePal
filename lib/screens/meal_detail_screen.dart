@@ -8,7 +8,7 @@ import 'package:plate_pal/widgets/plate_list_item.dart';
 
 class HealthScorePainter extends CustomPainter {
   final int healthScore; // Actual score (0-10)
-  final int maxScore;    // Typically 10
+  final int maxScore; // Typically 10
 
   HealthScorePainter({required this.healthScore, this.maxScore = 10});
 
@@ -16,14 +16,16 @@ class HealthScorePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     // Radius should be small enough to leave space for the 'i' icon if it's outside
-    final radius = size.width / 2 * 0.9; // Adjusted for a potentially tighter fit
+    final radius =
+        size.width / 2 * 0.9; // Adjusted for a potentially tighter fit
     const strokeWidth = 8.0; // Slightly thicker than before to match image
 
     // Background Arc (light pinkish/grey)
-    Paint backgroundPaint = Paint()
-      ..color = const Color(0xFFF0D9D9) // Light pinkish grey from image
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
+    Paint backgroundPaint =
+        Paint()
+          ..color = const Color(0xFFF0D9D9) // Light pinkish grey from image
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth;
     canvas.drawCircle(center, radius, backgroundPaint);
 
     // Foreground Arc (Progress)
@@ -35,17 +37,20 @@ class HealthScorePainter extends CustomPainter {
       // For now, let's assume it transitions or uses a mid-tier color.
       // If the image only shows red, then we might not need this middle segment.
       // Let's use orange as a placeholder for 6-8, adjust if needed.
-      progressColor = Colors.orangeAccent; // Placeholder - adjust if design has a specific color
+      progressColor =
+          Colors
+              .orangeAccent; // Placeholder - adjust if design has a specific color
     } else {
       // Assuming green for 9-10, adjust if different
       progressColor = AppColors.proteinColor; // Or a specific green
     }
 
-    Paint foregroundPaint = Paint()
-      ..color = progressColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round; // Rounded ends for the progress arc
+    Paint foregroundPaint =
+        Paint()
+          ..color = progressColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round; // Rounded ends for the progress arc
 
     double sweepAngle = (2 * 3.1415926535) * (healthScore / maxScore);
     canvas.drawArc(
@@ -59,7 +64,8 @@ class HealthScorePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant HealthScorePainter oldDelegate) {
-    return oldDelegate.healthScore != healthScore || oldDelegate.maxScore != maxScore;
+    return oldDelegate.healthScore != healthScore ||
+        oldDelegate.maxScore != maxScore;
   }
 }
 
@@ -473,39 +479,31 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   }
 
   Widget _buildHealthScoreSection() {
-    // Define colors from the image for better accuracy
-    const Color healthScoreTitleColor = Color(0xFF6A6A8B); // Purplish grey for title
-    const Color healthTipTitleColor = Color(0xFF6A6A8B); // Same for "How to make..."
-    const Color healthTipTextColor = AppColors.primaryText;
-    const Color infoIconBackgroundColor = Colors.black;
-    const Color infoIconColor = Colors.white;
-
     return Container(
-      padding: EdgeInsets.only(left: 0.0),
       height: 123,
       decoration: BoxDecoration(
-        color:AppColors.cardBackground,
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(25), // Rounded corners of the card
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start, // Align children to the top of the Row
+        crossAxisAlignment:
+            CrossAxisAlignment.start, // Align children to the top of the Row
         children: [
-          // Left: Health Score
-          Expanded(
-            flex: 3, // Adjust flex to give more space if needed
+          Padding(
+            padding: EdgeInsets.only(top: 4, left: 7),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(
-                height: 9, // Space between title and progress bar
-              ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SvgPicture.asset(
                       'assets/icons/health.svg', // Your custom health icon
-                      colorFilter: const ColorFilter.mode(healthScoreTitleColor, BlendMode.srcIn),
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.caloriesColorNutrients,
+                        BlendMode.srcIn,
+                      ),
                       height: 14,
                       width: 14,
                     ),
@@ -514,25 +512,25 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                       "Health Score",
                       style: TextStyle(
                         fontSize: 14,
-                        color: healthScoreTitleColor,
+                        color: AppColors.caloriesColorNutrients,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 SizedBox(
-                  width: 75, 
+                  width: 75,
                   height: 75,
                   child: Stack(
-                    clipBehavior: Clip.none, // Allow "i" button to overflow if needed
+                    clipBehavior: Clip.none,
                     alignment: Alignment.center,
                     children: [
-                      // The circular progress bar
                       CustomPaint(
                         size: const Size(70, 70), // Match SizedBox
                         painter: HealthScorePainter(
-                          healthScore: _currentMeal.healthScore, // Pass actual score
+                          healthScore:
+                              _currentMeal.healthScore, // Pass actual score
                           maxScore: 10,
                         ),
                       ),
@@ -545,20 +543,31 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                           color: AppColors.primaryText,
                         ),
                       ),
-                      // "i" button positioned on the top-left of the progress bar
                       Positioned(
-                        top: -5,  // Adjust for precise positioning relative to the circle
-                        left: -20, // Adjust for precise positioning
-                        child: Container(
-                          padding: const EdgeInsets.all(3), // Small padding
-                          decoration: const BoxDecoration(
-                            color: infoIconBackgroundColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.info_outline_rounded, // Or Icons.info
-                            color: infoIconColor,
-                            size: 14, // Smaller icon size
+                        top: -25,
+                        left: -35,
+                        child: InkWell(
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Health score info tapped! Larger area!",
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.only(
+                              right:30,
+                              top:20,
+                              bottom: 20,
+                              left: 20
+                            ), // Increase tappable area
+                            child: SvgPicture.asset(
+                              'assets/icons/info.svg', // Ensure this path is correct
+                              width: 20,
+                              height: 20,
+                            ),
                           ),
                         ),
                       ),
@@ -570,15 +579,15 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           ),
           // Vertical Divider
           Container(
-            width: 1, 
+            width: 1,
             color: AppColors.primaryText, // Lighter divider color
             margin: const EdgeInsets.symmetric(horizontal: 10),
           ),
           // Right: Tip
           Expanded(
-            flex: 4, // Adjust flex
+            flex: 4,
             child: Padding(
-              padding: const EdgeInsets.only(top: 4.0), // Align with "Health Score" title
+              padding: const EdgeInsets.only(top: 4.0, right: 7),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -587,7 +596,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                     "How to make this meal healthier?",
                     style: TextStyle(
                       fontSize: 14,
-                      color: healthTipTitleColor,
+                      color: AppColors.caloriesColorNutrients,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -596,9 +605,9 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                     _currentMeal.healthTip,
                     style: const TextStyle(
                       fontSize: 15, // Slightly larger tip text
-                      color: healthTipTextColor,
+                      color: AppColors.primaryText,
                       fontWeight: FontWeight.w500,
-                      height: 1.3 // Adjust line height for readability
+                      height: 1.3, // Adjust line height for readability
                     ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
