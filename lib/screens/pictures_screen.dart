@@ -1,18 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:plate_pal/screens/pictures_screen.dart';
 import 'package:plate_pal/utils/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class ScannerScreen extends StatefulWidget {
-  const ScannerScreen({Key? key}) : super(key: key);
+class PicturesScreen extends StatefulWidget {
+  final List<String> initialPicturePaths;
+
+  const PicturesScreen({Key? key, this.initialPicturePaths = const []})
+    : super(key: key);
 
   @override
-  State<ScannerScreen> createState() => _ScannerScreenState();
+  State<PicturesScreen> createState() => _PicturesScreenState();
 }
 
-class _ScannerScreenState extends State<ScannerScreen> {
-  bool _isFlashOn = false;
+class _PicturesScreenState extends State<PicturesScreen> {
+  late List<String> _picturePaths;
+  int _currentIndex = 0;
+
+  final List<String> _mockPlateImages = ['assets/images/pancakeCamera.png', 'assets/images/pasta.png'];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialPicturePaths.isNotEmpty) {
+      _picturePaths = List.from(widget.initialPicturePaths);
+    } else {
+      _picturePaths = _mockPlateImages;
+    }
+    _currentIndex = 0;
+  }
+
+  void _deleteCurrentImage() {
+    if (_picturePaths.isEmpty) return;
+
+    setState(() {
+      _picturePaths.removeAt(_currentIndex);
+      if (_picturePaths.isEmpty) {
+        Navigator.pop(
+          context,
+        ); 
+      } else if (_currentIndex >= _picturePaths.length) {
+        _currentIndex = _picturePaths.length - 1;
+      }
+    });
+  }
+
+  void _navigateToAddPicture() {
+    Navigator.pop(context);
+  }
+
+  void _done() {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
 
   void _showScannerHelpInfo(BuildContext context) {
     showModalBottomSheet(
@@ -91,12 +130,11 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: const BoxDecoration(
-                      // Use decoration if you want shaped background
-                      color: Colors.black, // From your image
+                      color: Colors.black,
                       shape: BoxShape.circle,
                     ),
                     child: SvgPicture.asset(
-                      'assets/icons/close_2.svg',
+                      'assets/icons/back.svg',
                       width: 20,
                       height: 20,
                     ),
@@ -112,8 +150,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // IMPORTANT: Replace with your actual image path
-    const String backgroundImagePath = 'assets/images/pancakeCamera.png';
+    final String currentMainImagePath =
+        _picturePaths.isNotEmpty
+            ? _picturePaths[_currentIndex]
+            : 'assets/images/placeholder.png';
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
@@ -126,28 +166,39 @@ class _ScannerScreenState extends State<ScannerScreen> {
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // Background Image
-            Image.asset(
-              backgroundImagePath,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                // Fallback if image fails to load
-                return Container(
-                  color: Colors.grey[800],
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'Error loading background image.\nMake sure "$backgroundImagePath" exists and is declared in pubspec.yaml.',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.white),
+            if (_picturePaths.isNotEmpty)
+              AnimatedSwitcher(
+                // Optional: For smooth transitions
+                duration: const Duration(milliseconds: 300),
+                child: Image.asset(
+                  currentMainImagePath,
+                  fit: BoxFit.cover,
+                  key: ValueKey<String>(
+                    currentMainImagePath,
+                  ), // Unique key for AnimatedSwitcher
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[800],
+                      child: const Center(
+                        child: Text(
+                          'Error Loading Image',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
-                    ),
+                    );
+                  },
+                ),
+              )
+            else
+              Container(
+                color: Colors.grey[900],
+                child: const Center(
+                  child: Text(
+                    "No pictures yet. Add one!",
+                    style: TextStyle(color: Colors.white, fontSize: 18),
                   ),
-                );
-              },
-            ),
-
+                ),
+              ),
             Positioned(
               top: 0,
               left: 0,
@@ -203,7 +254,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                             scale: 0.6,
                             alignment: Alignment.center,
                             child: SvgPicture.asset(
-                              'assets/icons/close_2.svg',
+                              'assets/icons/back.svg',
                               height: 20,
                               width: 20,
                             ),
@@ -211,7 +262,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                         ),
                       ),
                       const Text(
-                        'Scanner',
+                        'Pictures',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -254,14 +305,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 ),
               ),
             ),
-            Center(
-              child: SvgPicture.asset(
-                'assets/icons/frame.svg',
-                fit: BoxFit.contain,
-              ),
-            ),
-
-            // Bottom Controls (Flash, Capture)
             Positioned(
               bottom: 0,
               left: 0,
@@ -269,57 +312,77 @@ class _ScannerScreenState extends State<ScannerScreen> {
               child: SafeArea(
                 top: false,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 30.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                  padding: const EdgeInsets.only(bottom: 20.0, top: 10.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildCircularIconButton(
-                        icon: _isFlashOn ? Icons.flash_on : Icons.flash_off,
-                        iconColor: Colors.black,
-                        onPressed: () {
-                          setState(() {
-                            _isFlashOn = !_isFlashOn;
-                          });
-                        },
-                        iconSize: 24,
-                        padding: 10,
+                      SizedBox(
+                        height: 70,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.only(left: 16.0),
+                                itemCount: _picturePaths.length,
+                                itemBuilder: (context, index) {
+                                  bool isSelected = index == _currentIndex;
+                                  return _buildThumbnailItem(
+                                    imagePath: _picturePaths[index],
+                                    isSelected: isSelected,
+                                    isDeletable:
+                                        isSelected,
+                                    onTap: () {
+                                      setState(() {
+                                        _currentIndex = index;
+                                      });
+                                    },
+                                    onDelete:
+                                        _deleteCurrentImage,
+                                  );
+                                },
+                              ),
+                            ),
+                            // Add New Picture Button at the end of the row
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6.0,
+                              ),
+                              child: _buildAddButton(_navigateToAddPicture),
+                            ),
+                          ],
+                        ),
                       ),
-                      GestureDetector(
-                        onTap: () async {
-                          Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder:
-                                  (context, animation, secondaryAnimation) =>
-                                      PicturesScreen(),
-                              transitionDuration: Duration.zero,
-                              reverseTransitionDuration: Duration.zero,
-                            ),
-                          );
-                        },
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          padding: const EdgeInsets.all(
-                            3.5,
-                          ), // Space for the outer border
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3.5),
+                      const SizedBox(height: 25),
+                      // Done Button
+                      ElevatedButton(
+                        onPressed: _done,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(
+                            200,
+                            55,
+                          ), // Full width, fixed height
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(70),
                           ),
-                          child: Container(
-                            // Inner white circle
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        child: const Text(
+                          'Done',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
-                      SizedBox(
-                        width: 24 + 10 * 2,
-                      ), // Spacer to balance row (iconSize + padding*2)
                     ],
                   ),
                 ),
@@ -331,26 +394,72 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
   }
 
-  Widget _buildCircularIconButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-    double iconSize = 28.0,
-    double padding = 8.0,
-    Color iconColor = Colors.white,
+Widget _buildThumbnailItem({
+    required String imagePath,
+    required bool isSelected,
+    required bool isDeletable, // To show the bin icon
+    required VoidCallback onTap,
+    required VoidCallback onDelete,
   }) {
-    return Material(
-      // Use Material for InkWell ripple effect
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        customBorder: const CircleBorder(),
-        child: Container(
-          padding: EdgeInsets.all(padding),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: onTap, // To select this thumbnail as the main view
+      child: Container(
+        width: 70, // Thumbnail width
+        height: 70, // Thumbnail height
+        margin: const EdgeInsets.symmetric(horizontal: 6.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+            width: isSelected ? 2.5 : 1.5,
           ),
-          child: Icon(icon, color: iconColor, size: iconSize),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+              ),
+              if (isDeletable)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      // Semi-transparent reddish overlay for delete action
+                      color: Color.fromRGBO(196, 95, 99, 0.5)
+                      // borderRadius: BorderRadius.circular(10), // Match ClipRRect
+                    ),
+                    child: Center(
+                      child: SvgPicture.asset(
+                        'assets/icons/bin.svg', // Your trash icon
+                        width: 35,
+                        height: 35,
+                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddButton(VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 70,
+        height: 70,
+        child: Center(
+          child: SvgPicture.asset(
+            'assets/icons/add.svg',
+            width: 70,
+            height: 70,
+          ),
         ),
       ),
     );
