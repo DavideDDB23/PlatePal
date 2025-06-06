@@ -134,7 +134,7 @@ class _PicturesScreenState extends State<PicturesScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: SvgPicture.asset(
-                      'assets/icons/back.svg',
+                      'assets/icons/close_2.svg',
                       width: 20,
                       height: 20,
                     ),
@@ -427,9 +427,7 @@ Widget _buildThumbnailItem({
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
-                      // Semi-transparent reddish overlay for delete action
                       color: Color.fromRGBO(196, 95, 99, 0.5)
-                      // borderRadius: BorderRadius.circular(10), // Match ClipRRect
                     ),
                     child: Center(
                       child: SvgPicture.asset(
