@@ -7,20 +7,59 @@ class PlateListItem extends StatelessWidget {
   final Plate plate;
   final VoidCallback onDelete;
 
-  const PlateListItem({
-    Key? key,
-    required this.plate,
-    required this.onDelete,
-  }) : super(key: key);
+  const PlateListItem({Key? key, required this.plate, required this.onDelete})
+    : super(key: key);
 
-  Widget _buildMacroDetail(String iconAsset, String value, Color color) {
+  Widget _buildMacroDetail(String iconAsset, String value, String type) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SvgPicture.asset(iconAsset, height: 14, width: 14, colorFilter: ColorFilter.mode(color, BlendMode.srcIn)),
+        Transform.scale(
+          scale: type == 'Fats' ? 1.6 : 1.0,
+          alignment: Alignment.center,
+          child: SvgPicture.asset(iconAsset, height: 16, width: 16),
+        ),
         const SizedBox(width: 4),
-        Text(value, style: const TextStyle(fontSize: 12, color: AppColors.secondaryText)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 14, color: AppColors.primaryText),
+        ),
       ],
+    );
+  }
+
+  Widget _buildImageWidget(String imageUrl, {BorderRadius? borderRadius}) {
+    return ClipRRect(
+      borderRadius: borderRadius ?? BorderRadius.zero,
+      child: Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+        // Occupy available space within its cell
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder:
+            (context, error, stackTrace) => Container(
+              color: Colors.grey[300],
+              child: const Icon(Icons.broken_image, color: Colors.grey),
+            ),
+      ),
+    );
+  }
+
+  Widget _buildImageLayout() {
+    const double imageContainerWidth = 120;
+    const double imageContainerHeight = 130;
+
+    return SizedBox(
+      width: imageContainerWidth,
+      height: imageContainerHeight,
+      child: _buildImageWidget(
+        plate.imageUrl,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(25),
+          bottomLeft: Radius.circular(25),
+        ),
+      ),
     );
   }
 
@@ -28,66 +67,96 @@ class PlateListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       color: AppColors.cardBackground,
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(25)),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10.0),
-              child: Image.asset(
-                plate.imageUrl,
-                width: 70,
-                height: 70,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                    width: 70, height: 70, color: Colors.grey[300],
-                    child: const Icon(Icons.restaurant, color: Colors.grey)),
-              ),
-            ),
+            _buildImageLayout(),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    plate.name,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primaryText),
-                  ),
-                  const SizedBox(height: 4),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SvgPicture.asset('assets/icons/fire_icon.svg', height: 14, width: 14, colorFilter: const ColorFilter.mode(Colors.orange, BlendMode.srcIn)),
-                      const SizedBox(width: 4),
-                      Text('${plate.calories} calories', style: const TextStyle(fontSize: 12, color: AppColors.secondaryText)),
+                      Text(
+                        plate.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryText,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 13),
+                  Row(
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/fire_icon.svg', // Use your fire icon
+                        height: 16,
+                        width: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${plate.calories} calories',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.primaryText,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      _buildMacroDetail('assets/icons/protein_icon.svg', '${plate.proteinGrams}g', AppColors.proteinColor),
-                      const SizedBox(width: 10),
-                      _buildMacroDetail('assets/icons/carbs_icon.svg', '${plate.carbsGrams}g', AppColors.carbsColor),
-                      const SizedBox(width: 10),
-                      _buildMacroDetail('assets/icons/fats_icon.svg', '${plate.fatsGrams}g', AppColors.fatsColor),
+                      _buildMacroDetail(
+                        'assets/icons/protein_icon.svg',
+                        '${plate.proteinGrams}g',
+                        'Protein',
+                      ),
+                      const SizedBox(width: 12),
+                      _buildMacroDetail(
+                        'assets/icons/carbs_icon.svg',
+                        '${plate.carbsGrams}g',
+                        "Carbs",
+                      ),
+                      const SizedBox(width: 12),
+                      _buildMacroDetail(
+                        'assets/icons/fats_icon.svg',
+                        '${plate.fatsGrams}g',
+                        "Fats",
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
-            IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  color: Colors.redAccent,
+            InkWell(
+              onTap: onDelete,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Color.fromRGBO(252, 9, 9, 0.3),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.delete_outline, color: Colors.white, size: 20),
+                child: Center(
+                  child: SvgPicture.asset(
+                    'assets/icons/bin.svg',
+                    width: 18,
+                    height: 21,
+                  ),
+                ),
               ),
-              onPressed: onDelete,
             ),
           ],
         ),

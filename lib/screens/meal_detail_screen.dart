@@ -320,7 +320,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SvgPicture.asset(
-                  'assets/icons/fats_icon.svg',
+                  'assets/icons/accuracy.svg',
                   height: 15,
                   width: 15,
                   colorFilter: ColorFilter.mode(
