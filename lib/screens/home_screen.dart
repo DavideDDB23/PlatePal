@@ -365,6 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       initialMeal: meal,
                       onMealUpdated: _handleMealUpdated,
                       onMealDeleted: _handleMealDeletedFromDetailScreen,
+                      selectedDay: _selectedDay,
                     ),
               ),
             );

@@ -65,12 +65,14 @@ class MealDetailScreen extends StatefulWidget {
   final Meal initialMeal;
   final Function(Meal updatedMeal) onMealUpdated;
   final Function(String mealId) onMealDeleted;
+  final String selectedDay;
 
   const MealDetailScreen({
     Key? key,
     required this.initialMeal,
     required this.onMealUpdated,
     required this.onMealDeleted,
+    required this.selectedDay,
   }) : super(key: key);
 
   @override
@@ -266,7 +268,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           ),
           centerTitle: true,
           actions: [
-            Padding(
+            widget.selectedDay == "Today" ? Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: InkWell(
                 onTap: () {},
@@ -292,7 +294,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                   ),
                 ),
               ),
-            ),
+            ) : SizedBox(),
           ],
           systemOverlayStyle: const SystemUiOverlayStyle(
             statusBarColor:
