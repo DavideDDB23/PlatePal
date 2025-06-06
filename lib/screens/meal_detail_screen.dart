@@ -5,6 +5,8 @@ import 'package:plate_pal/models/meal_model.dart';
 import 'package:plate_pal/models/plate_model.dart';
 import 'package:plate_pal/utils/app_colors.dart';
 import 'package:plate_pal/widgets/plate_list_item.dart';
+import 'package:plate_pal/screens/scanner_screen.dart';
+import 'package:plate_pal/slide_from_bottom_route.dart';
 
 class HealthScorePainter extends CustomPainter {
   final int healthScore; // Actual score (0-10)
@@ -267,35 +269,6 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             ),
           ),
           centerTitle: true,
-          actions: [
-            widget.selectedDay == "Today" ? Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: InkWell(
-                onTap: () {},
-                customBorder: const CircleBorder(),
-                child: Container(
-                  padding: const EdgeInsets.all(
-                    10,
-                  ), // Adjust padding for icon size
-                  decoration: BoxDecoration(
-                    color: AppColors.cardBackground.withOpacity(
-                      0.8,
-                    ), // Semi-transparent white
-                    shape: BoxShape.circle,
-                  ),
-                  child: SvgPicture.asset(
-                    'assets/icons/delete_icon.svg', // Ensure you have this icon
-                    height: 22,
-                    width: 22,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.primaryText,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-              ),
-            ) : SizedBox(),
-          ],
           systemOverlayStyle: const SystemUiOverlayStyle(
             statusBarColor:
                 Colors.transparent, // Make status bar transparent for gradient
@@ -311,31 +284,38 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
               end: Alignment.bottomCenter,
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              SizedBox(
-                height:
-                    kToolbarHeight + MediaQuery.of(context).padding.top + 10,
-              ), // Space for AppBar and status bar + some margin
-              _buildMainInfoCard(), // The large white container
-              const SizedBox(height: 16),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(
-                  "Meal's Plates",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryText,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height:
+                        kToolbarHeight +
+                        MediaQuery.of(context).padding.top +
+                        10,
+                  ), // Space for AppBar and status bar + some margin
+                  _buildMainInfoCard(), // The large white container
+                  const SizedBox(height: 16),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      "Meal's Plates",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryText,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: _buildPlatesList(),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Expanded(
-                // This will contain the scrollable list of plates
-                child: _buildPlatesList(),
-              ),
+              _buildBottomFadeGradient(gradientEnd), // Gradient for the bottom
+              widget.selectedDay == "Today" ? _buildFloatingActionButton() : SizedBox() , 
             ],
           ),
         ),
@@ -682,28 +662,86 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
               ),
             ],
           ),
-          // Independent info button positioned absolutely
           Positioned(
             top: 4,
             left: -18,
             child: GestureDetector(
-                onTap: () {
-                  _showHealthScoreInfoSheet(context);
-                },
-                child: Container(
-                  width: 70, 
-                  height: 70,
-                  padding: const EdgeInsets.all(25), // Centers the icon
-                  child: SvgPicture.asset(
-                    'assets/icons/info.svg',
-                    width: 20,
-                    height: 20,
-                  ),
+              onTap: () {
+                _showHealthScoreInfoSheet(context);
+              },
+              child: Container(
+                width: 70,
+                height: 70,
+                padding: const EdgeInsets.all(25), // Centers the icon
+                child: SvgPicture.asset(
+                  'assets/icons/info.svg',
+                  width: 20,
+                  height: 20,
                 ),
+              ),
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildFloatingActionButton() {
+    return Positioned(
+      bottom: 30,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: SizedBox(
+          width: 80,
+          height: 80,
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                SlideFromBottomRoute(page: const ScannerScreen()),
+              );
+            },
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            elevation: 3.0,
+            shape: const CircleBorder(),
+            child: SvgPicture.asset(
+              "assets/icons/plus.svg",
+              width: 40,
+              height: 40,
+              colorFilter: const ColorFilter.mode(
+                Colors.white,
+                BlendMode.srcIn,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Widget _buildBottomFadeGradient(Color pageBottomColor) {
+  return Positioned(
+    bottom: 0,
+    left: 0,
+    right: 0,
+    child: IgnorePointer(
+      child: Container(
+        height: 60.0, // Adjust height of the fade effect
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              pageBottomColor.withOpacity(0),
+              pageBottomColor.withOpacity(1),
+              pageBottomColor,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+      ),
+    ),
+  );
 }
