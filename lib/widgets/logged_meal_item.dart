@@ -228,6 +228,7 @@ class LoggedMealItem extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryText,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -258,7 +259,7 @@ class LoggedMealItem extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${meal.calories} calories',
+                        '${meal.totalCalories} calories',
                         style: const TextStyle(
                           fontSize: 14,
                           color: AppColors.primaryText,
@@ -272,19 +273,19 @@ class LoggedMealItem extends StatelessWidget {
                     children: [
                       _buildMacroDetail(
                         'assets/icons/protein_icon.svg',
-                        '${meal.proteinGrams}g',
+                        '${meal.totalProteinGrams}g',
                         'Protein',
                       ),
                       const SizedBox(width: 12),
                       _buildMacroDetail(
                         'assets/icons/carbs_icon.svg',
-                        '${meal.carbsGrams}g',
+                        '${meal.totalCarbsGrams}g',
                         "Carbs",
                       ),
                       const SizedBox(width: 12),
                       _buildMacroDetail(
                         'assets/icons/fats_icon.svg',
-                        '${meal.fatsGrams}g',
+                        '${meal.totalFatsGrams}g',
                         "Fats",
                       ),
                     ],

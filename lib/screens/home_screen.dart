@@ -5,7 +5,8 @@ import 'package:plate_pal/models/meal_model.dart';
 import 'package:plate_pal/utils/app_colors.dart';
 import 'package:plate_pal/widgets/calorie_summary_card.dart';
 import 'package:plate_pal/widgets/logged_meal_item.dart';
-
+import 'package:plate_pal/models/plate_model.dart';
+import 'package:plate_pal/screens/meal_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -23,23 +24,35 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Meal> _yesterdayMeals = [
     Meal(
-      name: 'Pancake',
-      imageUrls: ['assets/images/pancake.png', 'assets/images/pancake.png'],
-      calories: 825,
-      proteinGrams: 30,
-      carbsGrams: 130,
-      fatsGrams: 40,
-      time: '13:20',
-    ),
-    Meal(
-      name: 'Fattoush Salad',
-      imageUrls: ['assets/images/pancake.png', 'assets/images/pancake.png', 'assets/images/pancake.png'],
-      calories: 153,
-      proteinGrams: 12,
-      carbsGrams: 12,
-      fatsGrams: 12,
-      time: '12:57',
-    ),
+    name: 'Pancakes', 
+    time: '08:30',
+    accuracyPercentage: 90,
+    healthScore: 5,
+    healthTip: "Use whole wheat flour for more fiber.",
+    plates: [
+      Plate(
+        name: 'Pancake Stack',
+        imageUrl: 'assets/images/pancake.png',
+        calories: 780, proteinGrams: 28, carbsGrams: 120, fatsGrams: 35
+      ),
+      Plate(
+        name: 'Side of Berries',
+        imageUrl: 'assets/images/pancake.png',
+        calories: 45, proteinGrams: 2, carbsGrams: 10, fatsGrams: 5
+      ),
+    ],
+  ),
+  Meal(
+    name: 'Fattoush Salad',
+    time: '12:57',
+    plates: [
+      Plate(
+        name: 'Fattoush Salad',
+        imageUrl: 'assets/images/pancake.jpg',
+        calories: 153, proteinGrams: 12, carbsGrams: 12, fatsGrams: 12
+      ),
+    ],
+  ),
   ];
 
   List<Meal> get _currentLoggedMeals =>
@@ -65,11 +78,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _updateSummary() {
     final meals = _currentLoggedMeals;
-    _totalKcal = meals.fold(0, (sum, item) => sum + item.calories);
-    _proteinGrams = meals.fold(0, (sum, item) => sum + item.proteinGrams);
-    _carbsGrams = meals.fold(0, (sum, item) => sum + item.carbsGrams);
-    _fatsGrams = meals.fold(0, (sum, item) => sum + item.fatsGrams);
+    // Use the new getters from the Meal model
+    _totalKcal = meals.fold(0, (sum, item) => sum + item.totalCalories);
+    _proteinGrams = meals.fold(0, (sum, item) => sum + item.totalProteinGrams);
+    _carbsGrams = meals.fold(0, (sum, item) => sum + item.totalCarbsGrams);
+    _fatsGrams = meals.fold(0, (sum, item) => sum + item.totalFatsGrams);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -268,6 +283,30 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+ void _handleMealUpdated(Meal updatedMeal) {
+    setState(() {
+      // Find the index of the meal to update in the correct list
+      int todayIndex = _todayMeals.indexWhere((m) => m.id == updatedMeal.id);
+      if (todayIndex != -1) {
+        _todayMeals[todayIndex] = updatedMeal;
+      } else {
+        int yesterdayIndex = _yesterdayMeals.indexWhere((m) => m.id == updatedMeal.id);
+        if (yesterdayIndex != -1) {
+          _yesterdayMeals[yesterdayIndex] = updatedMeal;
+        }
+      }
+      _updateSummary(); // Recalculate totals
+    });
+  }
+
+  void _handleMealDeletedFromDetailScreen(String mealId) {
+    setState(() {
+      _todayMeals.removeWhere((meal) => meal.id == mealId);
+      _yesterdayMeals.removeWhere((meal) => meal.id == mealId);
+      _updateSummary(); // Recalculate totals
+    });
+  }
+
   Widget _buildMealListView() {
     if (_currentLoggedMeals.isEmpty) {
       return Align( // Use Align instead of Center
@@ -284,10 +323,25 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.only(bottom: 120.0, top: 0),
+      padding: const EdgeInsets.only(bottom: 60.0, top: 0),
       itemCount: _currentLoggedMeals.length,
       itemBuilder: (context, index) {
-        return LoggedMealItem(meal: _currentLoggedMeals[index]);
+        final meal = _currentLoggedMeals[index];
+        return GestureDetector( // Add GestureDetector here
+          onTap: () async {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MealDetailScreen(
+                  initialMeal: meal,
+                  onMealUpdated: _handleMealUpdated,
+                  onMealDeleted: _handleMealDeletedFromDetailScreen,
+                ),
+              ),
+            );
+          },
+          child: LoggedMealItem(meal: meal), // Your existing LoggedMealItem
+        );
       },
     );
   }
