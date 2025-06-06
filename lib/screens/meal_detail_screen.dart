@@ -15,7 +15,6 @@ class HealthScorePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    // Radius should be small enough to leave space for the 'i' icon if it's outside
     final radius =
         size.width / 2 * 0.9; // Adjusted for a potentially tighter fit
     const strokeWidth = 8.0; // Slightly thicker than before to match image
@@ -23,7 +22,7 @@ class HealthScorePainter extends CustomPainter {
     // Background Arc (light pinkish/grey)
     Paint backgroundPaint =
         Paint()
-          ..color = const Color(0xFFF0D9D9) // Light pinkish grey from image
+          ..color = Color.fromRGBO(180, 29, 29, 0.3)
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWidth;
     canvas.drawCircle(center, radius, backgroundPaint);
@@ -31,18 +30,11 @@ class HealthScorePainter extends CustomPainter {
     // Foreground Arc (Progress)
     Color progressColor;
     if (healthScore <= 5) {
-      progressColor = const Color(0xFFD32F2F); // Darker Red from image
+      progressColor = Color.fromRGBO(180, 29, 29, 1);
     } else if (healthScore <= 8) {
-      // You might need a specific color for 6-8 if it's different in your design.
-      // For now, let's assume it transitions or uses a mid-tier color.
-      // If the image only shows red, then we might not need this middle segment.
-      // Let's use orange as a placeholder for 6-8, adjust if needed.
-      progressColor =
-          Colors
-              .orangeAccent; // Placeholder - adjust if design has a specific color
+      progressColor = Color.fromRGBO(255, 104, 30, 1);
     } else {
-      // Assuming green for 9-10, adjust if different
-      progressColor = AppColors.proteinColor; // Or a specific green
+      progressColor = AppColors.fatsColor;
     }
 
     Paint foregroundPaint =
@@ -99,6 +91,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       healthScore: widget.initialMeal.healthScore,
       healthTip: widget.initialMeal.healthTip,
       plates: List<Plate>.from(widget.initialMeal.plates),
+      explainationHealth: widget.initialMeal.explainationHealth,
     );
   }
 
@@ -116,6 +109,103 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     } else if (mealWasModified) {
       setState(() {});
     }
+  }
+
+  void _showHealthScoreInfoSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.cardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      builder: (BuildContext bContext) {
+        return Padding(
+          padding: const EdgeInsets.only(
+            top: 10,
+            left: 20,
+            right: 20,
+            bottom: 20,
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const SizedBox(height: 25),
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      SvgPicture.asset(
+                        "assets/icons/health.svg",
+                        width: 33,
+                        height: 33,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "Why Health Score is ${_currentMeal.healthScore}/10 ?",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.caloriesColorNutrients,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 25), // Increased spacing
+                  Text(
+                    "The Health Score rates how balanced your plate is (calories & macros), from 1 (poor) to 10 (ideal).",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: AppColors.primaryText,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 30), // Adjusted spacing
+                  Text(
+                    _currentMeal.explainationHealth,
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: AppColors.primaryText,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
+
+              // Positioned X button
+              Positioned(
+                top: -5,
+                right: -15,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () {
+                      Navigator.pop(bContext);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      child: SvgPicture.asset(
+                        'assets/icons/close.svg',
+                        width: 35,
+                        height: 35,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -483,137 +573,131 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       height: 123,
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(25), // Rounded corners of the card
+        borderRadius: BorderRadius.circular(25),
       ),
-      child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start, // Align children to the top of the Row
+      child: Stack(
         children: [
-          Padding(
-            padding: EdgeInsets.only(top: 4, left: 7),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          // Main content row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(top: 4, left: 7),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SvgPicture.asset(
-                      'assets/icons/health.svg', // Your custom health icon
-                      colorFilter: const ColorFilter.mode(
-                        AppColors.caloriesColorNutrients,
-                        BlendMode.srcIn,
-                      ),
-                      height: 14,
-                      width: 14,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/health.svg',
+                          colorFilter: const ColorFilter.mode(
+                            AppColors.caloriesColorNutrients,
+                            BlendMode.srcIn,
+                          ),
+                          height: 14,
+                          width: 14,
+                        ),
+                        const SizedBox(width: 6),
+                        const Text(
+                          "Health Score",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.caloriesColorNutrients,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      "Health Score",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.caloriesColorNutrients,
-                        fontWeight: FontWeight.w600,
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: 75,
+                      height: 75,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CustomPaint(
+                            size: const Size(70, 70),
+                            painter: HealthScorePainter(
+                              healthScore: _currentMeal.healthScore,
+                              maxScore: 10,
+                            ),
+                          ),
+                          // Score text inside the circle
+                          Text(
+                            "${_currentMeal.healthScore}/10",
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.primaryText,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: 75,
-                  height: 75,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.center,
+              ),
+              // Vertical Divider
+              Container(
+                width: 1,
+                color: AppColors.primaryText,
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+              ),
+              // Right: Tip
+              Expanded(
+                flex: 4,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4.0, right: 7),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      CustomPaint(
-                        size: const Size(70, 70), // Match SizedBox
-                        painter: HealthScorePainter(
-                          healthScore:
-                              _currentMeal.healthScore, // Pass actual score
-                          maxScore: 10,
+                      const Text(
+                        "How to make this meal healthier?",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.caloriesColorNutrients,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      // Text "3/10" inside the circle
+                      const SizedBox(height: 8),
                       Text(
-                        "${_currentMeal.healthScore}/10",
+                        _currentMeal.healthTip,
                         style: const TextStyle(
-                          fontSize: 18, // Larger font for score
-                          fontWeight: FontWeight.w500,
+                          fontSize: 15,
                           color: AppColors.primaryText,
+                          fontWeight: FontWeight.w500,
+                          height: 1.3,
                         ),
-                      ),
-                      Positioned(
-                        top: -25,
-                        left: -35,
-                        child: InkWell(
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  "Health score info tapped! Larger area!",
-                                ),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.only(
-                              right:30,
-                              top:20,
-                              bottom: 20,
-                              left: 20
-                            ), // Increase tappable area
-                            child: SvgPicture.asset(
-                              'assets/icons/info.svg', // Ensure this path is correct
-                              width: 20,
-                              height: 20,
-                            ),
-                          ),
-                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          // Vertical Divider
-          Container(
-            width: 1,
-            color: AppColors.primaryText, // Lighter divider color
-            margin: const EdgeInsets.symmetric(horizontal: 10),
-          ),
-          // Right: Tip
-          Expanded(
-            flex: 4,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4.0, right: 7),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text(
-                    "How to make this meal healthier?",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.caloriesColorNutrients,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _currentMeal.healthTip,
-                    style: const TextStyle(
-                      fontSize: 15, // Slightly larger tip text
-                      color: AppColors.primaryText,
-                      fontWeight: FontWeight.w500,
-                      height: 1.3, // Adjust line height for readability
-                    ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
               ),
+            ],
+          ),
+          // Independent info button positioned absolutely
+          Positioned(
+            top: 4,
+            left: -18,
+            child: GestureDetector(
+                onTap: () {
+                  _showHealthScoreInfoSheet(context);
+                },
+                child: Container(
+                  width: 70, 
+                  height: 70,
+                  padding: const EdgeInsets.all(25), // Centers the icon
+                  child: SvgPicture.asset(
+                    'assets/icons/info.svg',
+                    width: 20,
+                    height: 20,
+                  ),
+                ),
             ),
           ),
         ],

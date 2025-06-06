@@ -9,15 +9,17 @@ class Meal {
   final int accuracyPercentage; // e.g., 85
   final int healthScore; // e.g., 3 for 3/10
   final String healthTip;
+  final String explainationHealth;
 
   Meal({
     String? id,
     required this.name,
     required this.plates,
     required this.time,
-    this.accuracyPercentage = 85, // Default value
-    this.healthScore = 3,         // Default value
-    this.healthTip = "Add some greek yogurt to increase protein.", // Default
+    required this.accuracyPercentage,
+    required this.healthScore,         
+    required this.healthTip,
+    required this.explainationHealth
   }) : id = id ?? const Uuid().v4();
 
   // Calculated properties

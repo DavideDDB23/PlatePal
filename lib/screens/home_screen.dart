@@ -19,40 +19,55 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedDay = 'Today';
   late ScrollController _scrollController;
 
-  final List<Meal> _todayMeals = [
-  ];
+  final List<Meal> _todayMeals = [];
 
   final List<Meal> _yesterdayMeals = [
     Meal(
-    name: 'Pancakes', 
-    time: '08:30',
-    accuracyPercentage: 90,
-    healthScore: 5,
-    healthTip: "Use whole wheat flour for more fiber.",
-    plates: [
-      Plate(
-        name: 'Pancake Stack',
-        imageUrl: 'assets/images/pancake.png',
-        calories: 780, proteinGrams: 28, carbsGrams: 120, fatsGrams: 35
-      ),
-      Plate(
-        name: 'Side of Berries',
-        imageUrl: 'assets/images/pancake.png',
-        calories: 45, proteinGrams: 2, carbsGrams: 10, fatsGrams: 5
-      ),
-    ],
-  ),
-  Meal(
-    name: 'Fattoush Salad',
-    time: '12:57',
-    plates: [
-      Plate(
-        name: 'Fattoush Salad',
-        imageUrl: 'assets/images/pancake.png',
-        calories: 153, proteinGrams: 12, carbsGrams: 12, fatsGrams: 12
-      ),
-    ],
-  ),
+      name: 'Pancakes',
+      time: '08:30',
+      accuracyPercentage: 90,
+      healthScore: 5,
+      healthTip: "Use whole wheat flour for more fiber.",
+      plates: [
+        Plate(
+          name: 'Pancake Stack',
+          imageUrl: 'assets/images/pancake.png',
+          calories: 780,
+          proteinGrams: 28,
+          carbsGrams: 120,
+          fatsGrams: 35,
+        ),
+        Plate(
+          name: 'Side of Berries',
+          imageUrl: 'assets/images/pancake.png',
+          calories: 45,
+          proteinGrams: 2,
+          carbsGrams: 10,
+          fatsGrams: 5,
+        ),
+      ],
+      explainationHealth:
+          "This meal got 5/10 because is unbalanced, it is too high in carbs and fats and low in protein.",
+    ),
+    Meal(
+      name: 'Fattoush Salad',
+      time: '12:57',
+      accuracyPercentage: 90,
+      healthScore: 5,
+      healthTip: "Use whole wheat flour for more fiber.",
+      plates: [
+        Plate(
+          name: 'Fattoush Salad',
+          imageUrl: 'assets/images/pancake.png',
+          calories: 153,
+          proteinGrams: 12,
+          carbsGrams: 12,
+          fatsGrams: 12,
+        ),
+      ],
+      explainationHealth:
+          "This meal got 3/10 because is unbalanced, it is too high in carbs and fats and low in protein.",
+    ),
   ];
 
   List<Meal> get _currentLoggedMeals =>
@@ -85,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _fatsGrams = meals.fold(0, (sum, item) => sum + item.totalFatsGrams);
   }
 
-
   @override
   Widget build(BuildContext context) {
     const Color gradientStart = AppColors.backgroundGradientStart;
@@ -100,11 +114,13 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SvgPicture.asset(
-              'assets/icons/mela.svg', 
+              'assets/icons/mela.svg',
               height: 31,
               width: 31,
               colorFilter: const ColorFilter.mode(
-                  AppColors.primaryText, BlendMode.srcIn),
+                AppColors.primaryText,
+                BlendMode.srcIn,
+              ),
             ),
             const SizedBox(width: 8),
             const Text(
@@ -119,13 +135,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         toolbarHeight: 50,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: const SystemUiOverlayStyle( 
+        systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: gradientStart,
           statusBarIconBrightness: Brightness.dark,
           statusBarBrightness: Brightness.light,
         ),
       ),
-      body: Container( // Wrap body with Container for the main background gradient
+      body: Container(
+        // Wrap body with Container for the main background gradient
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [gradientStart, gradientEnd],
@@ -147,17 +164,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 _buildLoggedMealsTitle(),
                 Expanded(
-                  child: Stack( // Stack for list and bottom fade gradient
+                  child: Stack(
+                    // Stack for list and bottom fade gradient
                     children: [
                       _buildMealListView(),
-                      _selectedDay == "Today" ? _buildBottomFadeGradientToday(gradientEnd) : _buildBottomFadeGradientYesterday(gradientEnd), 
+                      _selectedDay == "Today"
+                          ? _buildBottomFadeGradientToday(gradientEnd)
+                          : _buildBottomFadeGradientYesterday(gradientEnd),
                     ],
                   ),
                 ),
               ],
             ),
 
-            _selectedDay == "Today" ? _buildFloatingActionButton() : const SizedBox.shrink(),
+            _selectedDay == "Today"
+                ? _buildFloatingActionButton()
+                : const SizedBox.shrink(),
           ],
         ),
       ),
@@ -169,13 +191,14 @@ class _HomeScreenState extends State<HomeScreen> {
       bottom: 0,
       left: 0,
       right: 0,
-      child: IgnorePointer( // Makes the gradient non-interactive
+      child: IgnorePointer(
+        // Makes the gradient non-interactive
         child: Container(
           height: 130.0, // Adjust height of the fade effect
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                pageBottomColor.withOpacity(0.1), 
+                pageBottomColor.withOpacity(0.1),
                 pageBottomColor.withOpacity(0.9),
                 pageBottomColor.withOpacity(1),
                 pageBottomColor,
@@ -195,13 +218,14 @@ class _HomeScreenState extends State<HomeScreen> {
       bottom: 0,
       left: 0,
       right: 0,
-      child: IgnorePointer( // Makes the gradient non-interactive
+      child: IgnorePointer(
+        // Makes the gradient non-interactive
         child: Container(
           height: 60.0, // Adjust height of the fade effect
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                pageBottomColor.withOpacity(0), 
+                pageBottomColor.withOpacity(0),
                 pageBottomColor.withOpacity(1),
                 pageBottomColor,
               ],
@@ -213,7 +237,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
 
   Widget _buildDaySelector() {
     return Padding(
@@ -276,21 +299,24 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Text(
         'Logged Meals',
         style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.primaryText),
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primaryText,
+        ),
       ),
     );
   }
 
- void _handleMealUpdated(Meal updatedMeal) {
+  void _handleMealUpdated(Meal updatedMeal) {
     setState(() {
       // Find the index of the meal to update in the correct list
       int todayIndex = _todayMeals.indexWhere((m) => m.id == updatedMeal.id);
       if (todayIndex != -1) {
         _todayMeals[todayIndex] = updatedMeal;
       } else {
-        int yesterdayIndex = _yesterdayMeals.indexWhere((m) => m.id == updatedMeal.id);
+        int yesterdayIndex = _yesterdayMeals.indexWhere(
+          (m) => m.id == updatedMeal.id,
+        );
         if (yesterdayIndex != -1) {
           _yesterdayMeals[yesterdayIndex] = updatedMeal;
         }
@@ -309,8 +335,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMealListView() {
     if (_currentLoggedMeals.isEmpty) {
-      return Align( // Use Align instead of Center
-        alignment: const Alignment(0.0, -0.5), 
+      return Align(
+        // Use Align instead of Center
+        alignment: const Alignment(0.0, -0.5),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
@@ -327,16 +354,18 @@ class _HomeScreenState extends State<HomeScreen> {
       itemCount: _currentLoggedMeals.length,
       itemBuilder: (context, index) {
         final meal = _currentLoggedMeals[index];
-        return GestureDetector( // Add GestureDetector here
+        return GestureDetector(
+          // Add GestureDetector here
           onTap: () async {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => MealDetailScreen(
-                  initialMeal: meal,
-                  onMealUpdated: _handleMealUpdated,
-                  onMealDeleted: _handleMealDeletedFromDetailScreen,
-                ),
+                builder:
+                    (context) => MealDetailScreen(
+                      initialMeal: meal,
+                      onMealUpdated: _handleMealUpdated,
+                      onMealDeleted: _handleMealDeletedFromDetailScreen,
+                    ),
               ),
             );
           },
@@ -365,9 +394,11 @@ class _HomeScreenState extends State<HomeScreen> {
             foregroundColor: Colors.white,
             elevation: 3.0,
             shape: const CircleBorder(),
-            child: SvgPicture.asset("assets/icons/camera.svg", // Make sure this icon exists
-                width: 40,
-                height: 40),
+            child: SvgPicture.asset(
+              "assets/icons/camera.svg", // Make sure this icon exists
+              width: 40,
+              height: 40,
+            ),
           ),
         ),
       ),
