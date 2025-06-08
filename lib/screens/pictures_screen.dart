@@ -17,7 +17,7 @@ class _PicturesScreenState extends State<PicturesScreen> {
   late List<String> _picturePaths;
   int _currentIndex = 0;
 
-  final List<String> _mockPlateImages = ['assets/images/pancakeCamera.png', 'assets/images/pasta.png'];
+  final List<String> _mockPlateImages = ['assets/images/pancakeCamera.png'];
 
   @override
   void initState() {
@@ -36,9 +36,7 @@ class _PicturesScreenState extends State<PicturesScreen> {
     setState(() {
       _picturePaths.removeAt(_currentIndex);
       if (_picturePaths.isEmpty) {
-        Navigator.pop(
-          context,
-        ); 
+        Navigator.pop(context);
       } else if (_currentIndex >= _picturePaths.length) {
         _currentIndex = _picturePaths.length - 1;
       }
@@ -332,15 +330,13 @@ class _PicturesScreenState extends State<PicturesScreen> {
                                   return _buildThumbnailItem(
                                     imagePath: _picturePaths[index],
                                     isSelected: isSelected,
-                                    isDeletable:
-                                        isSelected,
+                                    isDeletable: isSelected,
                                     onTap: () {
                                       setState(() {
                                         _currentIndex = index;
                                       });
                                     },
-                                    onDelete:
-                                        _deleteCurrentImage,
+                                    onDelete: _deleteCurrentImage,
                                   );
                                 },
                               ),
@@ -394,15 +390,15 @@ class _PicturesScreenState extends State<PicturesScreen> {
     );
   }
 
-Widget _buildThumbnailItem({
+  Widget _buildThumbnailItem({
     required String imagePath,
     required bool isSelected,
-    required bool isDeletable, // To show the bin icon
+    required bool isDeletable,
     required VoidCallback onTap,
     required VoidCallback onDelete,
   }) {
     return GestureDetector(
-      onTap: onTap, // To select this thumbnail as the main view
+      onTap: onTap,
       child: Container(
         width: 70, // Thumbnail width
         height: 70, // Thumbnail height
@@ -419,22 +415,26 @@ Widget _buildThumbnailItem({
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-              ),
+              Image.asset(imagePath, fit: BoxFit.cover),
               if (isDeletable)
                 Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(196, 95, 99, 0.5)
-                    ),
-                    child: Center(
-                      child: SvgPicture.asset(
-                        'assets/icons/bin.svg', // Your trash icon
-                        width: 35,
-                        height: 35,
-                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                  child: GestureDetector(
+                    onTap:
+                        onDelete,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(196, 95, 99, 0.5),
+                      ),
+                      child: Center(
+                        child: SvgPicture.asset(
+                          'assets/icons/bin.svg',
+                          width: 35,
+                          height: 35,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                       ),
                     ),
                   ),
