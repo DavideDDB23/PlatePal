@@ -7,6 +7,8 @@ import 'package:plate_pal/utils/app_colors.dart';
 import 'package:plate_pal/widgets/plate_list_item.dart';
 import 'package:plate_pal/screens/scanner_screen.dart';
 import 'package:plate_pal/slide_from_bottom_route.dart';
+import 'package:plate_pal/data/meal_combo_data.dart';
+import 'package:collection/collection.dart';
 
 class HealthScorePainter extends CustomPainter {
   final double animatedScore;
@@ -104,48 +106,48 @@ class _MealDetailScreenState extends State<MealDetailScreen> with TickerProvider
     );
   }
 
+  // --- REFACTORED Add/Remove Functions ---
   void _addPlateToCurrentMeal(Plate newPlate) {
-  setState(() {
-    _currentMeal.plates.add(newPlate);
-  });
-}
+    // Create the new list of plates
+    final newPlatesList = List<Plate>.from(_currentMeal.plates)..add(newPlate);
+    // Call the central update function
+    _updateMealWithNewPlates(newPlatesList);
+  }
 
-void _removePlate(String plateId) {
-  // Find the plate to be removed to get its healthScoreAdd value
-  final plateToRemove = _currentMeal.plates.firstWhere(
-    (plate) => plate.id == plateId,
-  );
+void _updateMealWithNewPlates(List<Plate> newPlatesList) {
+    if (newPlatesList.isEmpty) {
+      widget.onMealDeleted(_currentMeal.id);
+      Navigator.of(context).pop();
+      return;
+    }
 
-  // If the dummy plate was returned, it means the plate wasn't found. Exit.
-  if (plateToRemove.name.isEmpty) return;
+    final bestCombo = findBestComboForPlates(newPlatesList);
 
-  // Create a new list of plates without the removed one
-  final newPlatesList = List<Plate>.from(_currentMeal.plates)
-    ..removeWhere((plate) => plate.id == plateId);
+    int newHealthScore = _currentMeal.healthScore;
+    int healthScoreAdjustment = newPlatesList.fold(0, (sum, plate) => sum + plate.healthScoreAdd);
+    newHealthScore = (newHealthScore + healthScoreAdjustment).clamp(0, 10);
 
-  // Calculate the new health score
-  int newHealthScore = _currentMeal.healthScore + plateToRemove.healthScoreAdd;
+    final updatedMeal = _currentMeal.copyWith(
+      plates: newPlatesList,
+      healthScore: newHealthScore,
+      name: bestCombo?.mealName ?? "Custom Meal",
+      healthTip: bestCombo?.healthTip ?? "Review your plates for a balanced meal.",
+      explainationHealth: bestCombo?.explanation ?? "The balance of your meal has changed.",
+    );
 
-  // Create a new updated Meal object using the copyWith method
-  final updatedMeal = _currentMeal.copyWith(
-    plates: newPlatesList,
-    healthScore: newHealthScore,
-    // You could also update the healthTip and explanation here if they should change
-    // healthTip: "Your meal is now healthier!",
-    // explainationHealth: "Removing the plate improved the balance.",
-  );
-
-  // If the last plate was removed, exit the screen
-  if (updatedMeal.isEmpty) {
-    widget.onMealDeleted(_currentMeal.id);
-    Navigator.of(context).pop();
-  } else {
-    // Otherwise, update the state with the new Meal object
     setState(() {
       _currentMeal = updatedMeal;
     });
   }
-}
+
+
+void _removePlate(String plateId) {
+    // Create the new list of plates
+    final newPlatesList = List<Plate>.from(_currentMeal.plates)
+      ..removeWhere((plate) => plate.id == plateId);
+
+    _updateMealWithNewPlates(newPlatesList);
+  }
 
   void _showHealthScoreInfoSheet(BuildContext context) {
     showModalBottomSheet(

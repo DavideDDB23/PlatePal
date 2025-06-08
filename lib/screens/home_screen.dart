@@ -5,10 +5,11 @@ import 'package:plate_pal/models/meal_model.dart';
 import 'package:plate_pal/utils/app_colors.dart';
 import 'package:plate_pal/widgets/calorie_summary_card.dart';
 import 'package:plate_pal/widgets/logged_meal_item.dart';
-import 'package:plate_pal/models/plate_model.dart';
 import 'package:plate_pal/screens/meal_detail_screen.dart';
 import 'package:plate_pal/screens/scanner_screen.dart';
 import 'package:plate_pal/slide_from_bottom_route.dart';
+import 'package:plate_pal/data/mock_data.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -23,104 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Meal> _todayMeals = [];
 
-  final List<Meal> _yesterdayMeals = [
-    Meal(
-      name: 'Italian Breakfast',
-      time: '9.35',
-      accuracyPercentage: 90,
-      healthScore: 3,
-      healthTip:"Try a whole grain cornetto and add Greek yogurt for protein.",
-      plates: [
-        Plate(
-          name: 'Plain Cornetto',
-          imageUrl: 'assets/images/cornetto.jpeg',
-          calories: 220,
-          proteinGrams: 4,
-          carbsGrams: 28,
-          fatsGrams: 10,
-          healthScoreAdd: 1,
-        ),
-        Plate(
-          name: 'Cappuccino',
-          imageUrl: 'assets/images/cappuccino.jpg',
-          calories: 90,
-          proteinGrams: 4,
-          carbsGrams: 9,
-          fatsGrams: 6,
-          healthScoreAdd: 0,
-        ),
-      ],
-      explainationHealth:
-        "because it is high in refined carbs and low in protein and fiber. It lacks the nutritional balance needed for sustained energy and satiety.",
-    ),
-    Meal(
-      name: 'Double Temptation',
-      time: '15:00',
-      accuracyPercentage: 95,
-      healthScore: 4,
-      healthTip: "Use whole wheat dough and add chicken for more fiber and protein.",
-      plates: [
-        Plate(
-          name: 'Pizza',
-          imageUrl: 'assets/images/pizza.png',
-          calories: 850,
-          proteinGrams: 32,
-          carbsGrams: 90,
-          fatsGrams: 38,
-          healthScoreAdd: 1,
-        ),
-        Plate(
-          name: 'Gelato',
-          imageUrl: 'assets/images/gelato.jpg',
-          calories: 450,
-          proteinGrams: 6,
-          carbsGrams: 50,
-          fatsGrams: 22,
-          healthScoreAdd: 2,
-        ),
-      ],
-      explainationHealth:
-        "due to being high in calories, saturated fats, and refined carbs, while lacking fiber and sufficient protein.",
-    ),
-    Meal(
-      name: 'Italian Dinner',
-      time: '20:40',
-      accuracyPercentage: 93,
-      healthScore: 3,
-      healthTip: "Add a side salad or grilled vegetables to boost fiber and reduce calorie density.",
-      plates: [
-        Plate(
-          name: 'Bolognese Lasagna',
-          imageUrl: 'assets/images/lasagna.jpg',
-          calories: 400,
-          proteinGrams: 20,
-          carbsGrams: 35,
-          fatsGrams: 20,
-          healthScoreAdd: 1,
-        ),
-        Plate(
-          name: 'Baked Potatoes',
-          imageUrl: 'assets/images/patate.png',
-          calories: 180,
-          proteinGrams: 4,
-          carbsGrams: 37,
-          fatsGrams: 2,
-          healthScoreAdd: 0,
-        ),
-        Plate(
-          name: 'Tiramisù',
-          imageUrl: 'assets/images/tiramisu.jpeg',
-          calories: 420,
-          proteinGrams: 6,
-          carbsGrams: 45,
-          fatsGrams: 25,
-          healthScoreAdd: 2,
-        )
-      ],
-      explainationHealth:
-        "due to being high in calories, saturated fats, and refined carbs, while lacking fiber and lean protein. Adding vegetables and reducing dessert portions could improve balance.",
-    ),
-  ];
+  final List<Meal> _yesterdayMeals = yesterdayMealsMock;
 
   List<Meal> get _currentLoggedMeals =>
       _selectedDay == 'Today' ? _todayMeals : _yesterdayMeals;
