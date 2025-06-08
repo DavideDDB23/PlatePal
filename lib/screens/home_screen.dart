@@ -38,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
           proteinGrams: 4,
           carbsGrams: 28,
           fatsGrams: 10,
+          healthScoreAdd: 1,
         ),
         Plate(
           name: 'Cappuccino',
@@ -46,10 +47,11 @@ class _HomeScreenState extends State<HomeScreen> {
           proteinGrams: 4,
           carbsGrams: 9,
           fatsGrams: 6,
+          healthScoreAdd: 0,
         ),
       ],
       explainationHealth:
-        "This meal scores 3/10 because it is high in refined carbs and low in protein and fiber. It lacks the nutritional balance needed for sustained energy and satiety.",
+        "because it is high in refined carbs and low in protein and fiber. It lacks the nutritional balance needed for sustained energy and satiety.",
     ),
     Meal(
       name: 'Double Temptation',
@@ -65,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
           proteinGrams: 32,
           carbsGrams: 90,
           fatsGrams: 38,
+          healthScoreAdd: 1,
         ),
         Plate(
           name: 'Gelato',
@@ -73,10 +76,11 @@ class _HomeScreenState extends State<HomeScreen> {
           proteinGrams: 6,
           carbsGrams: 50,
           fatsGrams: 22,
+          healthScoreAdd: 2,
         ),
       ],
       explainationHealth:
-        "This meal scores 4/10 due to being high in calories, saturated fats, and refined carbs, while lacking fiber and sufficient protein.",
+        "due to being high in calories, saturated fats, and refined carbs, while lacking fiber and sufficient protein.",
     ),
     Meal(
       name: 'Italian Dinner',
@@ -92,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
           proteinGrams: 20,
           carbsGrams: 35,
           fatsGrams: 20,
+          healthScoreAdd: 1,
         ),
         Plate(
           name: 'Baked Potatoes',
@@ -100,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
           proteinGrams: 4,
           carbsGrams: 37,
           fatsGrams: 2,
+          healthScoreAdd: 0,
         ),
         Plate(
           name: 'Tiramisù',
@@ -108,10 +114,11 @@ class _HomeScreenState extends State<HomeScreen> {
           proteinGrams: 6,
           carbsGrams: 45,
           fatsGrams: 25,
+          healthScoreAdd: 2,
         )
       ],
       explainationHealth:
-        "This meal scores 3/10 due to being high in calories, saturated fats, and refined carbs, while lacking fiber and lean protein. Adding vegetables and reducing dessert portions could improve balance.",
+        "due to being high in calories, saturated fats, and refined carbs, while lacking fiber and lean protein. Adding vegetables and reducing dessert portions could improve balance.",
     ),
   ];
 

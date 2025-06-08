@@ -36,4 +36,26 @@ class Meal {
 
   // Helper to check if meal is empty (no plates)
   bool get isEmpty => plates.isEmpty;
+
+   Meal copyWith({
+    String? id,
+    String? name,
+    List<Plate>? plates,
+    String? time,
+    int? accuracyPercentage,
+    int? healthScore,
+    String? healthTip,
+    String? explainationHealth,
+  }) {
+    return Meal(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      plates: plates ?? this.plates,
+      time: time ?? this.time,
+      accuracyPercentage: accuracyPercentage ?? this.accuracyPercentage,
+      healthScore: healthScore ?? this.healthScore,
+      healthTip: healthTip ?? this.healthTip,
+      explainationHealth: explainationHealth ?? this.explainationHealth,
+    );
+  }
 }

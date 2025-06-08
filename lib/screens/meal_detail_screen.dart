@@ -9,17 +9,22 @@ import 'package:plate_pal/screens/scanner_screen.dart';
 import 'package:plate_pal/slide_from_bottom_route.dart';
 
 class HealthScorePainter extends CustomPainter {
-  final int healthScore; // Actual score (0-10)
-  final int maxScore; // Typically 10
+  final double animatedScore;
+  final int targetScore; 
+  final int maxScore; 
 
-  HealthScorePainter({required this.healthScore, this.maxScore = 10});
-  
+  HealthScorePainter({
+    required this.animatedScore,
+    required this.targetScore,
+    this.maxScore = 10,
+  });  
+
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius =
-        size.width / 2 * 0.9; // Adjusted for a potentially tighter fit
-    const strokeWidth = 8.0; // Slightly thicker than before to match image
+        size.width / 2 * 0.9; 
+    const strokeWidth = 8.0;
 
     // Background Arc (light pinkish/grey)
     Paint backgroundPaint =
@@ -31,9 +36,9 @@ class HealthScorePainter extends CustomPainter {
 
     // Foreground Arc (Progress)
     Color progressColor;
-    if (healthScore <= 5) {
+    if (targetScore <= 5) {
       progressColor = Color.fromRGBO(180, 29, 29, 1);
-    } else if (healthScore <= 8) {
+    } else if (targetScore <= 8) {
       progressColor = Color.fromRGBO(255, 104, 30, 1);
     } else {
       progressColor = AppColors.fatsColor;
@@ -44,9 +49,9 @@ class HealthScorePainter extends CustomPainter {
           ..color = progressColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWidth
-          ..strokeCap = StrokeCap.round; // Rounded ends for the progress arc
+          ..strokeCap = StrokeCap.round;
 
-    double sweepAngle = (2 * 3.1415926535) * (healthScore / maxScore);
+    double sweepAngle = (2 * 3.1415926535) * (animatedScore / maxScore);
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       -3.1415926535 / 2, // Start at the top
@@ -58,7 +63,7 @@ class HealthScorePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant HealthScorePainter oldDelegate) {
-    return oldDelegate.healthScore != healthScore ||
+    return oldDelegate.animatedScore != animatedScore ||
         oldDelegate.maxScore != maxScore;
   }
 }
@@ -81,7 +86,7 @@ class MealDetailScreen extends StatefulWidget {
   State<MealDetailScreen> createState() => _MealDetailScreenState();
 }
 
-class _MealDetailScreenState extends State<MealDetailScreen> {
+class _MealDetailScreenState extends State<MealDetailScreen> with TickerProviderStateMixin {
   late Meal _currentMeal;
 
   @override
@@ -105,21 +110,42 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   });
 }
 
-  void _removePlate(String plateId) {
-    bool mealWasModified = false;
-    final initialLength = _currentMeal.plates.length;
-    _currentMeal.plates.removeWhere((plate) => plate.id == plateId);
-    if (_currentMeal.plates.length < initialLength) {
-      mealWasModified = true;
-    }
+void _removePlate(String plateId) {
+  // Find the plate to be removed to get its healthScoreAdd value
+  final plateToRemove = _currentMeal.plates.firstWhere(
+    (plate) => plate.id == plateId,
+  );
 
-    if (_currentMeal.isEmpty) {
-      widget.onMealDeleted(_currentMeal.id);
-      Navigator.of(context).pop();
-    } else if (mealWasModified) {
-      setState(() {});
-    }
+  // If the dummy plate was returned, it means the plate wasn't found. Exit.
+  if (plateToRemove.name.isEmpty) return;
+
+  // Create a new list of plates without the removed one
+  final newPlatesList = List<Plate>.from(_currentMeal.plates)
+    ..removeWhere((plate) => plate.id == plateId);
+
+  // Calculate the new health score
+  int newHealthScore = _currentMeal.healthScore + plateToRemove.healthScoreAdd;
+
+  // Create a new updated Meal object using the copyWith method
+  final updatedMeal = _currentMeal.copyWith(
+    plates: newPlatesList,
+    healthScore: newHealthScore,
+    // You could also update the healthTip and explanation here if they should change
+    // healthTip: "Your meal is now healthier!",
+    // explainationHealth: "Removing the plate improved the balance.",
+  );
+
+  // If the last plate was removed, exit the screen
+  if (updatedMeal.isEmpty) {
+    widget.onMealDeleted(_currentMeal.id);
+    Navigator.of(context).pop();
+  } else {
+    // Otherwise, update the state with the new Meal object
+    setState(() {
+      _currentMeal = updatedMeal;
+    });
   }
+}
 
   void _showHealthScoreInfoSheet(BuildContext context) {
     showModalBottomSheet(
@@ -178,7 +204,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                   ),
                   const SizedBox(height: 30), // Adjusted spacing
                   Text(
-                    _currentMeal.explainationHealth,
+                    "This meal scores ${_currentMeal.healthScore}/10 ${_currentMeal.explainationHealth}",
                     style: TextStyle(
                       fontSize: 20,
                       color: AppColors.primaryText,
@@ -605,16 +631,39 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          CustomPaint(
-                            size: const Size(70, 70),
-                            painter: HealthScorePainter(
-                              healthScore: _currentMeal.healthScore,
-                              maxScore: 10,
+                          TweenAnimationBuilder<double>(
+                            tween: Tween<double>(
+                              begin: 0, // Initial start, will be ignored on subsequent builds
+                              end: _currentMeal.healthScore.toDouble(), // The target value
+                            ),
+                            duration: const Duration(milliseconds: 700), // Animation duration
+                            curve: Curves.easeInOutCubic, // Animation curve
+                            builder: (context, animatedValue, child) {
+                              return CustomPaint(
+                                size: const Size(70, 70),
+                                painter: HealthScorePainter(
+                                  animatedScore: animatedValue,
+                                  targetScore: _currentMeal.healthScore,
+                                  maxScore: 10,
+                                ),
+                                child: child, // Pass the child to the painter
+                              );
+                            },
+                            // The child is passed to the builder so it doesn't rebuild on every frame
+                            child: Center(
+                              child: Text(
+                                "${_currentMeal.healthScore}/10",
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.primaryText,
+                                ),
+                              ),
                             ),
                           ),
                           // Score text inside the circle
                           Text(
-                            "${_currentMeal.healthScore}/10",
+                            "${_currentMeal.healthScore.round()}/10",
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,

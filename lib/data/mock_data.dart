@@ -9,6 +9,7 @@ final Plate pancakePlate = Plate(
   proteinGrams: 28,
   carbsGrams: 120,
   fatsGrams: 35,
+  healthScoreAdd: 0,
 );
 
 final Plate pastaPlate = Plate(
@@ -18,6 +19,7 @@ final Plate pastaPlate = Plate(
   proteinGrams: 35,
   carbsGrams: 90,
   fatsGrams: 20,
+  healthScoreAdd: 0,
 );
 
 final Plate saladPlate = Plate(
@@ -27,6 +29,7 @@ final Plate saladPlate = Plate(
   proteinGrams: 5,
   carbsGrams: 15,
   fatsGrams: 8,
+  healthScoreAdd: 0,
 );
 
 

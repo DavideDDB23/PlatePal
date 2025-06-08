@@ -8,6 +8,7 @@ class Plate {
   final int proteinGrams;
   final int carbsGrams;
   final int fatsGrams;
+  final int healthScoreAdd;
 
   Plate({
     String? id, // Allow providing an ID, otherwise generate one
@@ -17,5 +18,6 @@ class Plate {
     required this.proteinGrams,
     required this.carbsGrams,
     required this.fatsGrams,
+    required this.healthScoreAdd,
   }) : id = id ?? const Uuid().v4(); // Generate unique ID if not provided
 }
