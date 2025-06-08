@@ -13,7 +13,7 @@ class HealthScorePainter extends CustomPainter {
   final int maxScore; // Typically 10
 
   HealthScorePainter({required this.healthScore, this.maxScore = 10});
-
+  
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
@@ -98,6 +98,12 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       explainationHealth: widget.initialMeal.explainationHealth,
     );
   }
+
+  void _addPlateToCurrentMeal(Plate newPlate) {
+  setState(() {
+    _currentMeal.plates.add(newPlate);
+  });
+}
 
   void _removePlate(String plateId) {
     bool mealWasModified = false;
@@ -309,13 +315,13 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Expanded(
-                    child: _buildPlatesList(),
-                  ),
+                  Expanded(child: _buildPlatesList()),
                 ],
               ),
               _buildBottomFadeGradient(gradientEnd), // Gradient for the bottom
-              widget.selectedDay == "Today" ? _buildFloatingActionButton() : SizedBox() , 
+              widget.selectedDay == "Today"
+                  ? _buildFloatingActionButton()
+                  : SizedBox(),
             ],
           ),
         ),
@@ -362,7 +368,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     }
     return ListView.builder(
       padding: const EdgeInsets.only(
-        bottom: 20,
+        bottom: 60,
         top: 0,
       ), // Padding for the list
       itemCount: _currentMeal.plates.length,
@@ -699,7 +705,15 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                SlideFromBottomRoute(page: const ScannerScreen()),
+                SlideFromBottomRoute(
+                  page: ScannerScreen(
+                    onMealCreated: (Meal createdMeal) {
+                      if (createdMeal.plates.isNotEmpty) {
+                        _addPlateToCurrentMeal(createdMeal.plates.first);
+                      }
+                    },
+                  ),
+                ),
               );
             },
             backgroundColor: Colors.black,

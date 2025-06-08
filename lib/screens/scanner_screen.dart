@@ -3,9 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:plate_pal/screens/pictures_screen.dart';
 import 'package:plate_pal/utils/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:plate_pal/models/meal_model.dart';
+import 'package:plate_pal/data/mock_data.dart';
 
 class ScannerScreen extends StatefulWidget {
-  const ScannerScreen({Key? key}) : super(key: key);
+  final Function(Meal createdMeal) onMealCreated; // Callback from HomeScreen
+
+  const ScannerScreen({Key? key, required this.onMealCreated})
+    : super(key: key);
 
   @override
   State<ScannerScreen> createState() => _ScannerScreenState();
@@ -110,9 +115,25 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
   }
 
+  void _onCapture() {
+    // For this prototype, we'll always start the flow with the pancake picture.
+    // In a real app, this would be the image from the camera.
+    final List<String> initialPicture = [pancakePlate.imageUrl];
+
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder:
+            (context, animation, secondaryAnimation) =>
+                PicturesScreen(initialPicturePaths: initialPicture, onFlowCompleted: widget.onMealCreated,),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // IMPORTANT: Replace with your actual image path
     const String backgroundImagePath = 'assets/images/pancakeCamera.png';
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -286,18 +307,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                         padding: 10,
                       ),
                       GestureDetector(
-                        onTap: () async {
-                          Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder:
-                                  (context, animation, secondaryAnimation) =>
-                                      PicturesScreen(),
-                              transitionDuration: Duration.zero,
-                              reverseTransitionDuration: Duration.zero,
-                            ),
-                          );
-                        },
+                        onTap: _onCapture,
                         child: Container(
                           width: 80,
                           height: 80,

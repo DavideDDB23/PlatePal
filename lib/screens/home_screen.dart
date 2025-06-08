@@ -7,7 +7,7 @@ import 'package:plate_pal/widgets/calorie_summary_card.dart';
 import 'package:plate_pal/widgets/logged_meal_item.dart';
 import 'package:plate_pal/models/plate_model.dart';
 import 'package:plate_pal/screens/meal_detail_screen.dart';
-import 'package:plate_pal/screens/scanner_screen.dart'; 
+import 'package:plate_pal/screens/scanner_screen.dart';
 import 'package:plate_pal/slide_from_bottom_route.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,50 +25,93 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Meal> _yesterdayMeals = [
     Meal(
-      name: 'Pancakes',
-      time: '08:30',
+      name: 'Italian Breakfast',
+      time: '9.35',
       accuracyPercentage: 90,
-      healthScore: 5,
-      healthTip: "Use whole wheat flour for more fiber.",
+      healthScore: 3,
+      healthTip:"Try a whole grain cornetto and add Greek yogurt for protein.",
       plates: [
         Plate(
-          name: 'Pancake Stack',
-          imageUrl: 'assets/images/pancake.png',
-          calories: 780,
-          proteinGrams: 28,
-          carbsGrams: 120,
-          fatsGrams: 35,
+          name: 'Plain Cornetto',
+          imageUrl: 'assets/images/cornetto.jpeg',
+          calories: 220,
+          proteinGrams: 4,
+          carbsGrams: 28,
+          fatsGrams: 10,
         ),
         Plate(
-          name: 'Side of Berries',
-          imageUrl: 'assets/images/pancake.png',
-          calories: 45,
-          proteinGrams: 2,
-          carbsGrams: 10,
-          fatsGrams: 5,
+          name: 'Cappuccino',
+          imageUrl: 'assets/images/cappuccino.jpg',
+          calories: 90,
+          proteinGrams: 4,
+          carbsGrams: 9,
+          fatsGrams: 6,
         ),
       ],
       explainationHealth:
-          "This meal got 5/10 because is unbalanced, it is too high in carbs and fats and low in protein.",
+        "This meal scores 3/10 because it is high in refined carbs and low in protein and fiber. It lacks the nutritional balance needed for sustained energy and satiety.",
     ),
     Meal(
-      name: 'Fattoush Salad',
-      time: '12:57',
-      accuracyPercentage: 90,
-      healthScore: 5,
-      healthTip: "Use whole wheat flour for more fiber.",
+      name: 'Double Temptation',
+      time: '15:00',
+      accuracyPercentage: 95,
+      healthScore: 4,
+      healthTip: "Use whole wheat dough and add chicken for more fiber and protein.",
       plates: [
         Plate(
-          name: 'Fattoush Salad',
-          imageUrl: 'assets/images/pancake.png',
-          calories: 153,
-          proteinGrams: 12,
-          carbsGrams: 12,
-          fatsGrams: 12,
+          name: 'Pizza',
+          imageUrl: 'assets/images/pizza.png',
+          calories: 850,
+          proteinGrams: 32,
+          carbsGrams: 90,
+          fatsGrams: 38,
+        ),
+        Plate(
+          name: 'Gelato',
+          imageUrl: 'assets/images/gelato.jpg',
+          calories: 450,
+          proteinGrams: 6,
+          carbsGrams: 50,
+          fatsGrams: 22,
         ),
       ],
       explainationHealth:
-          "This meal got 3/10 because is unbalanced, it is too high in carbs and fats and low in protein.",
+        "This meal scores 4/10 due to being high in calories, saturated fats, and refined carbs, while lacking fiber and sufficient protein.",
+    ),
+    Meal(
+      name: 'Italian Dinner',
+      time: '20:40',
+      accuracyPercentage: 93,
+      healthScore: 3,
+      healthTip: "Add a side salad or grilled vegetables to boost fiber and reduce calorie density.",
+      plates: [
+        Plate(
+          name: 'Bolognese Lasagna',
+          imageUrl: 'assets/images/lasagna.jpg',
+          calories: 400,
+          proteinGrams: 20,
+          carbsGrams: 35,
+          fatsGrams: 20,
+        ),
+        Plate(
+          name: 'Baked Potatoes',
+          imageUrl: 'assets/images/patate.png',
+          calories: 180,
+          proteinGrams: 4,
+          carbsGrams: 37,
+          fatsGrams: 2,
+        ),
+        Plate(
+          name: 'Tiramisù',
+          imageUrl: 'assets/images/tiramisu.jpeg',
+          calories: 420,
+          proteinGrams: 6,
+          carbsGrams: 45,
+          fatsGrams: 25,
+        )
+      ],
+      explainationHealth:
+        "This meal scores 3/10 due to being high in calories, saturated fats, and refined carbs, while lacking fiber and lean protein. Adding vegetables and reducing dessert portions could improve balance.",
     ),
   ];
 
@@ -335,6 +378,13 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _addMealToToday(Meal newMeal) {
+    setState(() {
+      _todayMeals.add(newMeal);
+      _updateSummary();
+    });
+  }
+
   Widget _buildMealListView() {
     if (_currentLoggedMeals.isEmpty) {
       return Align(
@@ -357,7 +407,6 @@ class _HomeScreenState extends State<HomeScreen> {
       itemBuilder: (context, index) {
         final meal = _currentLoggedMeals[index];
         return GestureDetector(
-          // Add GestureDetector here
           onTap: () async {
             Navigator.push(
               context,
@@ -372,7 +421,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           },
-          child: LoggedMealItem(meal: meal), // Your existing LoggedMealItem
+          child: LoggedMealItem(meal: meal),
         );
       },
     );
@@ -390,10 +439,16 @@ class _HomeScreenState extends State<HomeScreen> {
           child: FloatingActionButton(
             onPressed: () {
               Navigator.push(
-              context,
-              SlideFromBottomRoute(page: const ScannerScreen()),
-            );
-          },
+                context,
+                SlideFromBottomRoute(
+                  page: ScannerScreen(
+                    onMealCreated: (Meal createdMeal) {
+                      _addMealToToday(createdMeal);
+                    },
+                  ),
+                ),
+              );
+            },
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,
             elevation: 3.0,

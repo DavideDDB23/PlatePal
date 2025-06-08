@@ -15,11 +15,7 @@ class LoggedMealItem extends StatelessWidget {
         Transform.scale(
           scale: type == 'Fats' ? 1.6 : 1.0,
           alignment: Alignment.center,
-          child: SvgPicture.asset(
-            iconAsset,
-            height: 16,
-            width: 16,
-          ),
+          child: SvgPicture.asset(iconAsset, height: 16, width: 16),
         ),
         const SizedBox(width: 4),
         Text(
@@ -39,10 +35,11 @@ class LoggedMealItem extends StatelessWidget {
         // Occupy available space within its cell
         width: double.infinity,
         height: double.infinity,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: Colors.grey[300],
-          child: const Icon(Icons.broken_image, color: Colors.grey),
-        ),
+        errorBuilder:
+            (context, error, stackTrace) => Container(
+              color: Colors.grey[300],
+              child: const Icon(Icons.broken_image, color: Colors.grey),
+            ),
       ),
     );
   }
@@ -67,7 +64,8 @@ class LoggedMealItem extends StatelessWidget {
         child: const Icon(Icons.no_food, color: Colors.grey),
       );
     }
-     if (imageCount > 4) { // Or some other handling for too many images
+    if (imageCount > 4) {
+      // Or some other handling for too many images
       return _buildImageWidget(
         meal.imageUrls.first,
         borderRadius: const BorderRadius.only(
@@ -76,7 +74,6 @@ class LoggedMealItem extends StatelessWidget {
         ),
       );
     }
-
 
     switch (imageCount) {
       case 1:
@@ -100,14 +97,18 @@ class LoggedMealItem extends StatelessWidget {
               Expanded(
                 child: _buildImageWidget(
                   meal.imageUrls[0],
-                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(25)),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(25),
+                  ),
                 ),
               ),
               // Optional: Divider(height: 1, color: Colors.white), // Separator
               Expanded(
                 child: _buildImageWidget(
                   meal.imageUrls[1],
-                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(25)),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(25),
+                  ),
                 ),
               ),
             ],
@@ -125,12 +126,16 @@ class LoggedMealItem extends StatelessWidget {
                     Expanded(
                       child: _buildImageWidget(
                         meal.imageUrls[0],
-                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(25)),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(25),
+                        ),
                       ),
                     ),
                     // Optional: VerticalDivider(width: 1, color: Colors.white),
                     Expanded(
-                      child: _buildImageWidget(meal.imageUrls[1]), // No border radius for middle top
+                      child: _buildImageWidget(
+                        meal.imageUrls[1],
+                      ), // No border radius for middle top
                     ),
                   ],
                 ),
@@ -139,7 +144,9 @@ class LoggedMealItem extends StatelessWidget {
               Expanded(
                 child: _buildImageWidget(
                   meal.imageUrls[2],
-                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(25)),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(25),
+                  ),
                 ),
               ),
             ],
@@ -157,7 +164,9 @@ class LoggedMealItem extends StatelessWidget {
                     Expanded(
                       child: _buildImageWidget(
                         meal.imageUrls[0],
-                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(25)),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(25),
+                        ),
                       ),
                     ),
                     // Optional: VerticalDivider(width: 1, color: Colors.white),
@@ -172,7 +181,9 @@ class LoggedMealItem extends StatelessWidget {
                     Expanded(
                       child: _buildImageWidget(
                         meal.imageUrls[2],
-                        borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(25)),
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(25),
+                        ),
                       ),
                     ),
                     // Optional: VerticalDivider(width: 1, color: Colors.white),
@@ -204,8 +215,7 @@ class LoggedMealItem extends StatelessWidget {
       elevation: 0,
       color: AppColors.cardBackground,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(25),
-        ),
+        borderRadius: BorderRadius.all(Radius.circular(25)),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Padding(
@@ -221,14 +231,16 @@ class LoggedMealItem extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        meal.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryText,
+                      Expanded(
+                        child: Text(
+                          meal.name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryText,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(

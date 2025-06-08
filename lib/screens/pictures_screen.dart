@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:plate_pal/utils/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:plate_pal/data/mock_data.dart';
+import 'package:plate_pal/models/meal_model.dart';
+import 'package:plate_pal/models/plate_model.dart';
 
 class PicturesScreen extends StatefulWidget {
   final List<String> initialPicturePaths;
+  final Function(Meal createdMeal) onFlowCompleted;
 
-  const PicturesScreen({Key? key, this.initialPicturePaths = const []})
-    : super(key: key);
+  const PicturesScreen({
+    Key? key,
+    this.initialPicturePaths = const [],
+    required this.onFlowCompleted,
+  }) : super(key: key);
 
   @override
   State<PicturesScreen> createState() => _PicturesScreenState();
@@ -17,16 +24,23 @@ class _PicturesScreenState extends State<PicturesScreen> {
   late List<String> _picturePaths;
   int _currentIndex = 0;
 
-  final List<String> _mockPlateImages = ['assets/images/pancakeCamera.png'];
+  // Map asset paths to Plate objects for easy logic
+  final Map<String, Plate> _assetToPlateMap = {
+    pancakePlate.imageUrl: pancakePlate,
+    pastaPlate.imageUrl: pastaPlate,
+    saladPlate.imageUrl: saladPlate,
+  };
+
+  // The list of other plates the user can "add"
+  final List<String> _availableMockImages = [
+    pastaPlate.imageUrl,
+    saladPlate.imageUrl,
+  ];
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialPicturePaths.isNotEmpty) {
-      _picturePaths = List.from(widget.initialPicturePaths);
-    } else {
-      _picturePaths = _mockPlateImages;
-    }
+    _picturePaths = List.from(widget.initialPicturePaths);
     _currentIndex = 0;
   }
 
@@ -44,10 +58,60 @@ class _PicturesScreenState extends State<PicturesScreen> {
   }
 
   void _navigateToAddPicture() {
-    Navigator.pop(context);
-  }
+    setState(() {
+      String? imageToAdd = _availableMockImages.firstWhere(
+        (img) => !_picturePaths.contains(img),
+        orElse: () => '',
+      );
 
+      if (imageToAdd.isNotEmpty) {
+        _picturePaths.add(imageToAdd);
+        _currentIndex = _picturePaths.length - 1;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("All available plates have been added.")),
+        );
+      }
+    });
+  }
   void _done() {
+    if (_picturePaths.isEmpty) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      return;
+    }
+
+    Meal finalMeal;
+
+    Set<Plate> finalPlates = _picturePaths
+        .map((path) => _assetToPlateMap[path])
+        .where((plate) => plate != null)
+        .cast<Plate>()
+        .toSet();
+
+    if (finalPlates.length == 2 && finalPlates.contains(pastaPlate) && finalPlates.contains(saladPlate)) {
+      finalMeal = createPastaAndSaladMeal();
+    } else if (finalPlates.contains(pancakePlate)) {
+      finalMeal = createPancakeMeal();
+    } else if (finalPlates.contains(pastaPlate)) {
+      finalMeal = createPastaMeal();
+    } else if (finalPlates.contains(saladPlate)) {
+      finalMeal = createSaladMeal();
+    } else {
+      finalMeal = Meal(
+        name: finalPlates.first.name,
+        plates: [finalPlates.first],
+        time: "12:00", // Default
+        accuracyPercentage: 85,
+        healthScore: 4,
+        healthTip: "Tip for this plate.",
+        explainationHealth: "Explanation for this plate.",
+      );
+    }
+
+    // 2. Call the callback passed from HomeScreen (via ScannerScreen)
+    widget.onFlowCompleted(finalMeal);
+
+    // 3. Close the entire flow and return to HomeScreen
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
@@ -419,8 +483,7 @@ class _PicturesScreenState extends State<PicturesScreen> {
               if (isDeletable)
                 Positioned.fill(
                   child: GestureDetector(
-                    onTap:
-                        onDelete,
+                    onTap: onDelete,
                     child: Container(
                       decoration: BoxDecoration(
                         color: const Color.fromRGBO(196, 95, 99, 0.5),
