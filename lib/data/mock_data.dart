@@ -92,6 +92,16 @@ final Plate pancakePlate = Plate(
   healthScoreAdd: 0,
 );
 
+final Plate fruitPlate = Plate(
+  name: 'Mixed Fruit',
+  imageUrl: 'assets/images/fruit.jpg',
+  calories: 120, 
+  proteinGrams: 2, 
+  carbsGrams: 30, 
+  fatsGrams: 1,
+  healthScoreAdd: 2,
+);
+
 final Plate pastaPlate = Plate(
   name: 'Pasta Bolognese',
   imageUrl: 'assets/images/pasta.png',
@@ -148,6 +158,8 @@ final List<Meal> yesterdayMealsMock = [
   )
 ];
 
+// --- TODAY'S MEALS ---
+
 Meal createPancakeMeal() {
   return Meal(
     name: 'Pancakes',
@@ -158,6 +170,31 @@ Meal createPancakeMeal() {
     explainationHealth:
         "This meal has a low score due to high carbohydrates and fats.",
     plates: [pancakePlate],
+  );
+}
+
+Meal createPancakeAndFruitMeal() {
+  return Meal(
+    name: 'Pancakes & Fruit',
+    time: '08:30',
+    accuracyPercentage: 93,
+    healthScore: 6,
+    healthTip: "Great addition! The fruit adds vitamins and fiber.",
+    explainationHealth: "because the fruit provides natural sugars and fiber, balancing the refined carbs of the pancakes.",
+    plates: [pancakePlate, fruitPlate],
+  );
+}
+
+Meal createFruitMeal() {
+  return Meal(
+    name: 'Fruit',
+    time: '08:30',
+    accuracyPercentage: 92,
+    healthScore: 3,
+    healthTip: "Use whole wheat flour for more fiber next time.",
+    explainationHealth:
+        "This meal has a low score due to high carbohydrates and fats.",
+    plates: [fruitPlate],
   );
 }
 

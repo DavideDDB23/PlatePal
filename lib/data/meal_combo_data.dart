@@ -88,6 +88,34 @@ final List<MealCombo> mealCombos = [
     healthTip: "Enjoy in moderation and pair with a protein-based snack to slow sugar absorption.",
     explanation: "because tiramisu is rich and sugary, best consumed in moderation due to its high fat and sugar content.",
   ),
+
+  MealCombo(
+    plateNames: {pancakePlate.name, fruitPlate.name},
+    mealName: "Pancakes with Fruit",
+    healthTip: "The fruit makes this a much more balanced breakfast.",
+    explanation: "because the fiber and vitamins from the fruit complement the meal.",
+  ),
+
+  MealCombo(
+    plateNames: {pancakePlate.name, fruitPlate.name},
+    mealName: "Pancakes & Fruit",
+    healthTip: "The fruit makes this a much more balanced breakfast.",
+    explanation: "because the fiber and vitamins from the fruit complement the meal.",
+  ),
+
+  MealCombo(
+    plateNames: {fruitPlate.name},
+    mealName: "Fruit",
+    healthTip: "The fruit makes this a much more balanced breakfast.",
+    explanation: "because the fiber and vitamins from the fruit complement the meal.",
+  ),
+
+  MealCombo(
+    plateNames: {pancakePlate.name},
+    mealName: "Pancakes",
+    healthTip: "The fruit makes this a much more balanced breakfast.",
+    explanation: "because the fiber and vitamins from the fruit complement the meal.",
+  ),
 ];
 
 MealCombo? findBestComboForPlates(List<Plate> plates) {

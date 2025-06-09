@@ -5,15 +5,27 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:plate_pal/data/mock_data.dart';
 import 'package:plate_pal/models/meal_model.dart';
 import 'package:plate_pal/models/plate_model.dart';
+import 'package:plate_pal/screens/scanner_screen.dart';
 
 class PicturesScreen extends StatefulWidget {
   final List<String> initialPicturePaths;
-  final Function(Meal createdMeal) onFlowCompleted;
+  final Function(Meal createdMeal, {required bool isPancakeMealDone, required bool isPastaMealDone, required bool hasAddedSaladToPasta, required bool hasAddedFruitToPancake}) onFlowCompleted;
+
+  final bool isPancakeMealDone;
+  final bool isPastaMealDone;
+  final bool hasAddedSaladToPasta;
+  final bool hasAddedFruitToPancake;
+  final bool isTodayMealsEmpty;
 
   const PicturesScreen({
     Key? key,
     this.initialPicturePaths = const [],
     required this.onFlowCompleted,
+    required this.isPancakeMealDone,
+    required this.isPastaMealDone,
+    required this.hasAddedSaladToPasta,
+    required this.hasAddedFruitToPancake,
+    required this.isTodayMealsEmpty,
   }) : super(key: key);
 
   @override
@@ -27,15 +39,11 @@ class _PicturesScreenState extends State<PicturesScreen> {
   // Map asset paths to Plate objects for easy logic
   final Map<String, Plate> _assetToPlateMap = {
     pancakePlate.imageUrl: pancakePlate,
+    fruitPlate.imageUrl: fruitPlate,
     pastaPlate.imageUrl: pastaPlate,
     saladPlate.imageUrl: saladPlate,
   };
 
-  // The list of other plates the user can "add"
-  final List<String> _availableMockImages = [
-    pastaPlate.imageUrl,
-    saladPlate.imageUrl,
-  ];
 
   @override
   void initState() {
@@ -57,23 +65,53 @@ class _PicturesScreenState extends State<PicturesScreen> {
     });
   }
 
-  void _navigateToAddPicture() {
-    setState(() {
-      String? imageToAdd = _availableMockImages.firstWhere(
-        (img) => !_picturePaths.contains(img),
-        orElse: () => '',
+  void _navigateToAddPicture() async {
+    Plate? plateToSuggest;
+
+    // Determine which plate to offer based on current pictures
+    if (_picturePaths.contains(pancakePlate.imageUrl) &&
+        !_picturePaths.contains(fruitPlate.imageUrl)) {
+      plateToSuggest = fruitPlate;
+    } else if (_picturePaths.contains(pastaPlate.imageUrl) &&
+        !_picturePaths.contains(saladPlate.imageUrl)) {
+      plateToSuggest = saladPlate;
+    }
+
+    if (plateToSuggest != null) {
+      // Pop current PicturesScreen, then push ScannerScreen
+      // Await the result from ScannerScreen (the captured plate)
+      final capturedPlate = await Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => ScannerScreen(
+            mode: ScannerMode.addPlate,
+            suggestedPlateForCapture: plateToSuggest,
+            isTodayMealsEmpty: widget.isTodayMealsEmpty,
+            isPancakeMealDone: widget.isPancakeMealDone,
+            isPastaMealDone: widget.isPastaMealDone,
+            hasAddedSaladToPasta: widget.hasAddedSaladToPasta,
+            hasAddedFruitToPancake: widget.hasAddedFruitToPancake,
+            onFlowCompleted: widget.onFlowCompleted,
+          ),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
       );
 
-      if (imageToAdd.isNotEmpty) {
-        _picturePaths.add(imageToAdd);
-        _currentIndex = _picturePaths.length - 1;
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("All available plates have been added.")),
-        );
+      // If a plate was captured (returned from ScannerScreen)
+      if (capturedPlate != null && capturedPlate is Plate) {
+        setState(() {
+          _picturePaths.add(capturedPlate.imageUrl);
+          _currentIndex = _picturePaths.length - 1;
+        });
       }
-    });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No more plates can be added for this meal.")),
+      );
+    }
   }
+
   void _done() {
     if (_picturePaths.isEmpty) {
       Navigator.of(context).popUntil((route) => route.isFirst);
@@ -81,6 +119,10 @@ class _PicturesScreenState extends State<PicturesScreen> {
     }
 
     Meal finalMeal;
+    bool updatedIsPancakeMealDone = widget.isPancakeMealDone;
+    bool updatedIsPastaMealDone = widget.isPastaMealDone;
+    bool updatedHasAddedSaladToPasta = widget.hasAddedSaladToPasta;
+    bool updatedHasAddedFruitToPancake = false;
 
     Set<Plate> finalPlates = _picturePaths
         .map((path) => _assetToPlateMap[path])
@@ -88,30 +130,56 @@ class _PicturesScreenState extends State<PicturesScreen> {
         .cast<Plate>()
         .toSet();
 
-    if (finalPlates.length == 2 && finalPlates.contains(pastaPlate) && finalPlates.contains(saladPlate)) {
-      finalMeal = createPastaAndSaladMeal();
-    } else if (finalPlates.contains(pancakePlate)) {
+    // Determine the meal and update state based on conditions
+    if (finalPlates.length == 1 && finalPlates.contains(pancakePlate)) {
       finalMeal = createPancakeMeal();
-    } else if (finalPlates.contains(pastaPlate)) {
+      updatedIsPancakeMealDone = true;
+    } else if (finalPlates.length == 2 && finalPlates.contains(pancakePlate) && finalPlates.contains(fruitPlate)) {
+      finalMeal = createPancakeAndFruitMeal();
+      updatedIsPancakeMealDone = true;
+      updatedHasAddedFruitToPancake = true;
+    } else if (finalPlates.length == 1 && finalPlates.contains(fruitPlate)) {
+      finalMeal = createFruitMeal();
+      updatedIsPancakeMealDone = true;
+    } else if (finalPlates.length == 1 && finalPlates.contains(pastaPlate)) {
       finalMeal = createPastaMeal();
-    } else if (finalPlates.contains(saladPlate)) {
+      updatedIsPastaMealDone = true;
+    } else if (finalPlates.length == 2 && finalPlates.contains(pastaPlate) && finalPlates.contains(saladPlate)) {
+      finalMeal = createPastaAndSaladMeal();
+      updatedHasAddedSaladToPasta = true;
+      updatedIsPastaMealDone = true;
+    } else if (finalPlates.length == 1 && finalPlates.contains(saladPlate)) {
       finalMeal = createSaladMeal();
     } else {
-      finalMeal = Meal(
-        name: finalPlates.first.name,
-        plates: [finalPlates.first],
-        time: "12:00", // Default
-        accuracyPercentage: 85,
-        healthScore: 4,
-        healthTip: "Tip for this plate.",
-        explainationHealth: "Explanation for this plate.",
-      );
+      // Fallback for any other combination or if plates are empty (should be caught by _picturePaths.isEmpty)
+      // For now, take the first plate if available
+      if (finalPlates.isNotEmpty) {
+        finalMeal = Meal(
+          name: finalPlates.first.name,
+          plates: [finalPlates.first],
+          time: "12:00", // Default
+          accuracyPercentage: 85,
+          healthScore: 4,
+          healthTip: "Tip for this plate.",
+          explainationHealth: "Explanation for this plate.",
+        );
+      } else {
+        // If for some reason finalPlates is empty here, return
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        return;
+      }
     }
 
-    // 2. Call the callback passed from HomeScreen (via ScannerScreen)
-    widget.onFlowCompleted(finalMeal);
+    // Call the callback with the created meal and updated state
+    widget.onFlowCompleted(
+      finalMeal,
+      isPancakeMealDone: updatedIsPancakeMealDone,
+      isPastaMealDone: updatedIsPastaMealDone,
+      hasAddedSaladToPasta: updatedHasAddedSaladToPasta,
+      hasAddedFruitToPancake: updatedHasAddedFruitToPancake,
+    );
 
-    // 3. Close the entire flow and return to HomeScreen
+    // Close the entire flow and return to HomeScreen
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
@@ -168,7 +236,7 @@ class _PicturesScreenState extends State<PicturesScreen> {
                   ),
                   const SizedBox(height: 25),
                   Text(
-                    "Then you can check the photos and tap the trash icon to remove one, or the “+” to add a new one.",
+                    "Then you can check the photos and tap the trash icon to remove one, or the "+" to add a new one.",
                     style: TextStyle(
                       fontSize: 20,
                       color: AppColors.primaryText,

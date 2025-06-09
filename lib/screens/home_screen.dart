@@ -9,6 +9,7 @@ import 'package:plate_pal/screens/meal_detail_screen.dart';
 import 'package:plate_pal/screens/scanner_screen.dart';
 import 'package:plate_pal/slide_from_bottom_route.dart';
 import 'package:plate_pal/data/mock_data.dart';
+import 'package:plate_pal/models/plate_model.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -33,6 +34,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int _proteinGrams = 0;
   int _carbsGrams = 0;
   int _fatsGrams = 0;
+
+  bool _isPancakeMealDone = false;
+  bool _hasAddedFruitToPancake = false;
+  bool _isPastaMealDone = false;
+  bool _hasAddedSaladToPasta = false;
 
   @override
   void initState() {
@@ -313,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.only(bottom: 60.0, top: 0),
+      padding: const EdgeInsets.only(bottom: 120.0, top: 0),
       itemCount: _currentLoggedMeals.length,
       itemBuilder: (context, index) {
         final meal = _currentLoggedMeals[index];
@@ -353,9 +359,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 SlideFromBottomRoute(
                   page: ScannerScreen(
-                    onMealCreated: (Meal createdMeal) {
-                      _addMealToToday(createdMeal);
+                    onFlowCompleted: (Meal createdMeal, {required bool isPancakeMealDone, required bool isPastaMealDone, required bool hasAddedSaladToPasta, required bool hasAddedFruitToPancake}) {
+                      setState(() {
+                        _addMealToToday(createdMeal);
+                        _isPancakeMealDone = isPancakeMealDone;
+                        _isPastaMealDone = isPastaMealDone;
+                        _hasAddedSaladToPasta = hasAddedSaladToPasta;
+                        _hasAddedFruitToPancake = hasAddedFruitToPancake;
+                      });
                     },
+                    isTodayMealsEmpty: _todayMeals.isEmpty,
+                    isPancakeMealDone: _isPancakeMealDone,
+                    isPastaMealDone: _isPastaMealDone,
+                    hasAddedSaladToPasta: _hasAddedSaladToPasta,
+                    hasAddedFruitToPancake: _hasAddedFruitToPancake,
+                    mode: ScannerMode.createMeal,
                   ),
                 ),
               );

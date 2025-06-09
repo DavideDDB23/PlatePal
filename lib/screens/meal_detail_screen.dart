@@ -754,7 +754,7 @@ void _removePlate(String plateId) {
           height: 80,
           child: FloatingActionButton(
             onPressed: () {
-              Navigator.push(
+  /*            Navigator.push(
                 context,
                 SlideFromBottomRoute(
                   page: ScannerScreen(
@@ -765,7 +765,7 @@ void _removePlate(String plateId) {
                     },
                   ),
                 ),
-              );
+              );*/
             },
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,

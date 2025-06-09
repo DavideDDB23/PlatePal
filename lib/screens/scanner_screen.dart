@@ -5,12 +5,32 @@ import 'package:plate_pal/utils/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:plate_pal/models/meal_model.dart';
 import 'package:plate_pal/data/mock_data.dart';
+import 'package:plate_pal/models/plate_model.dart'; // Import Plate model for imageUrl access
+
+enum ScannerMode { createMeal, addPlate } // New enum
 
 class ScannerScreen extends StatefulWidget {
-  final Function(Meal createdMeal) onMealCreated; // Callback from HomeScreen
+  final Function(Meal createdMeal, {required bool isPancakeMealDone, required bool isPastaMealDone, required bool hasAddedSaladToPasta, required bool hasAddedFruitToPancake})? onFlowCompleted; // Made optional
+  final Plate? suggestedPlateForCapture; // New parameter
+  final ScannerMode mode; // New parameter
 
-  const ScannerScreen({Key? key, required this.onMealCreated})
-    : super(key: key);
+  final bool isTodayMealsEmpty;
+  final bool isPancakeMealDone;
+  final bool isPastaMealDone;
+  final bool hasAddedSaladToPasta;
+  final bool hasAddedFruitToPancake;
+
+  const ScannerScreen({
+    Key? key,
+    this.onFlowCompleted, // Made optional for addPlate mode
+    this.suggestedPlateForCapture, // Initialize new parameter
+    this.mode = ScannerMode.createMeal, // Default mode
+    required this.isTodayMealsEmpty,
+    required this.isPancakeMealDone,
+    required this.isPastaMealDone,
+    required this.hasAddedSaladToPasta,
+    required this.hasAddedFruitToPancake,
+  }) : super(key: key);
 
   @override
   State<ScannerScreen> createState() => _ScannerScreenState();
@@ -18,6 +38,20 @@ class ScannerScreen extends StatefulWidget {
 
 class _ScannerScreenState extends State<ScannerScreen> {
   bool _isFlashOn = false;
+
+  String _getBackgroundImagePath() {
+    if (widget.mode == ScannerMode.addPlate && widget.suggestedPlateForCapture != null) {
+      return widget.suggestedPlateForCapture!.imageUrl;
+    }
+    if (widget.isTodayMealsEmpty) {
+      return 'assets/images/pancakeCamera.png';
+    } else if (widget.isPancakeMealDone && !widget.isPastaMealDone) {
+      return 'assets/images/pasta.png';
+    } else {
+      // Default or other conditions if any
+      return 'assets/images/pancakeCamera.png'; // Fallback
+    }
+  }
 
   void _showScannerHelpInfo(BuildContext context) {
     showModalBottomSheet(
@@ -72,7 +106,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   ),
                   const SizedBox(height: 25),
                   Text(
-                    "Then you can check the photos and tap the trash icon to remove one, or the “+” to add a new one.",
+                    "Then you can check the photos and tap the trash icon to remove one, or the "+" to add a new one.",
                     style: TextStyle(
                       fontSize: 20,
                       color: AppColors.primaryText,
@@ -116,16 +150,47 @@ class _ScannerScreenState extends State<ScannerScreen> {
   }
 
   void _onCapture() {
-    // For this prototype, we'll always start the flow with the pancake picture.
-    // In a real app, this would be the image from the camera.
-    final List<String> initialPicture = [pancakePlate.imageUrl];
+    if (widget.mode == ScannerMode.addPlate && widget.suggestedPlateForCapture != null) {
+      // In addPlate mode, pop and return the captured plate
+      Navigator.of(context).pop(widget.suggestedPlateForCapture);
+      return;
+    }
+
+    // Original logic for createMeal mode
+    String imageToUse;
+    if (widget.isTodayMealsEmpty) {
+      imageToUse = pancakePlate.imageUrl;
+    } else if (widget.isPancakeMealDone && !widget.isPastaMealDone) {
+      imageToUse = pastaPlate.imageUrl;
+    } else {
+      // Default or other conditions if any
+      imageToUse = pancakePlate.imageUrl; // Fallback
+    }
+
+    final List<String> initialPicture = [imageToUse];
 
     Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder:
             (context, animation, secondaryAnimation) =>
-                PicturesScreen(initialPicturePaths: initialPicture, onFlowCompleted: widget.onMealCreated,),
+                PicturesScreen(
+                  initialPicturePaths: initialPicture,
+                  onFlowCompleted: (Meal createdMeal, {required bool isPancakeMealDone, required bool isPastaMealDone, required bool hasAddedSaladToPasta, required bool hasAddedFruitToPancake}) {
+                    widget.onFlowCompleted!(
+                      createdMeal,
+                      isPancakeMealDone: isPancakeMealDone,
+                      isPastaMealDone: isPastaMealDone,
+                      hasAddedSaladToPasta: hasAddedSaladToPasta,
+                      hasAddedFruitToPancake: hasAddedFruitToPancake,
+                    );
+                  },
+                  isPancakeMealDone: widget.isPancakeMealDone,
+                  isPastaMealDone: widget.isPastaMealDone,
+                  hasAddedSaladToPasta: widget.hasAddedSaladToPasta,
+                  hasAddedFruitToPancake: widget.hasAddedFruitToPancake,
+                  isTodayMealsEmpty: widget.isTodayMealsEmpty,
+                ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
@@ -134,7 +199,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const String backgroundImagePath = 'assets/images/pancakeCamera.png';
+    final String backgroundImagePath = _getBackgroundImagePath();
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
