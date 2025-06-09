@@ -38,6 +38,22 @@ class ScannerScreen extends StatefulWidget {
 
 class _ScannerScreenState extends State<ScannerScreen> {
   bool _isFlashOn = false;
+  bool _isBackgroundImagePrecached = false; // New flag
+
+  @override
+  void initState() {
+    super.initState();
+    // Removed precacheImage from here
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isBackgroundImagePrecached) {
+      precacheImage(AssetImage(_getBackgroundImagePath()), context);
+      _isBackgroundImagePrecached = true;
+    }
+  }
 
   String _getBackgroundImagePath() {
     if (widget.mode == ScannerMode.addPlate && widget.suggestedPlateForCapture != null) {
@@ -168,6 +184,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
     }
 
     final List<String> initialPicture = [imageToUse];
+
+    // Precache the initial picture for PicturesScreen before navigating
+    precacheImage(AssetImage(initialPicture[0]), context);
 
     Navigator.push(
       context,

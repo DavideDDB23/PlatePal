@@ -35,6 +35,7 @@ class PicturesScreen extends StatefulWidget {
 class _PicturesScreenState extends State<PicturesScreen> {
   late List<String> _picturePaths;
   int _currentIndex = 0;
+  bool _areInitialImagesPrecached = false;
 
   // Map asset paths to Plate objects for easy logic
   final Map<String, Plate> _assetToPlateMap = {
@@ -50,6 +51,18 @@ class _PicturesScreenState extends State<PicturesScreen> {
     super.initState();
     _picturePaths = List.from(widget.initialPicturePaths);
     _currentIndex = 0;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_areInitialImagesPrecached) {
+      // Precache all initial images for PicturesScreen (main image and thumbnails)
+      for (String path in _picturePaths) {
+        precacheImage(AssetImage(path), context);
+      }
+      _areInitialImagesPrecached = true;
+    }
   }
 
   void _deleteCurrentImage() {
@@ -78,15 +91,18 @@ class _PicturesScreenState extends State<PicturesScreen> {
     }
 
     if (plateToSuggest != null) {
+      // Precache the suggested plate image before pushing ScannerScreen
+      await precacheImage(AssetImage(plateToSuggest.imageUrl), context);
+
       // Pop current PicturesScreen, then push ScannerScreen
       // Await the result from ScannerScreen (the captured plate)
       final capturedPlate = await Navigator.push(
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) => ScannerScreen(
-            mode: ScannerMode.addPlate,
-            suggestedPlateForCapture: plateToSuggest,
-            isTodayMealsEmpty: widget.isTodayMealsEmpty,
+            mode: ScannerMode.addPlate, // Set mode to add a single plate
+            suggestedPlateForCapture: plateToSuggest, // Pass the suggested plate
+            isTodayMealsEmpty: widget.isTodayMealsEmpty, // Pass this to ScannerScreen
             isPancakeMealDone: widget.isPancakeMealDone,
             isPastaMealDone: widget.isPastaMealDone,
             hasAddedSaladToPasta: widget.hasAddedSaladToPasta,

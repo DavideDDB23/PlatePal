@@ -354,7 +354,19 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 80,
           height: 80,
           child: FloatingActionButton(
-            onPressed: () {
+            onPressed: () async { // Made onPressed async
+              // Determine which image will be shown in ScannerScreen and precache it
+              String scannerInitialImagePath;
+              if (_todayMeals.isEmpty) {
+                scannerInitialImagePath = 'assets/images/pancakeCamera.png';
+              } else if (_isPancakeMealDone && !_isPastaMealDone) {
+                scannerInitialImagePath = 'assets/images/pasta.png';
+              } else {
+                scannerInitialImagePath = 'assets/images/pancakeCamera.png';
+              }
+
+              await precacheImage(AssetImage(scannerInitialImagePath), context);
+
               Navigator.push(
                 context,
                 SlideFromBottomRoute(

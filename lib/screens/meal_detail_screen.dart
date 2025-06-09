@@ -762,9 +762,9 @@ void _removePlate(String plateId) {
       canAdd = true;
     }
 
-  /*  if (!canAdd) {
+    if (!canAdd) {
       return const SizedBox.shrink(); // Don't show button if nothing can be added
-    }*/
+    }
 
     return Positioned(
       bottom: 30,
@@ -775,7 +775,11 @@ void _removePlate(String plateId) {
           width: 80,
           height: 80,
           child: FloatingActionButton(
-            onPressed: () async {
+            onPressed: () async { // Made onPressed async
+              if (plateToSuggest != null) {
+                await precacheImage(AssetImage(plateToSuggest.imageUrl), context); // Precache the suggested plate image
+              }
+
               // Navigate to ScannerScreen in addPlate mode
               final capturedPlate = await Navigator.push(
                 context,
