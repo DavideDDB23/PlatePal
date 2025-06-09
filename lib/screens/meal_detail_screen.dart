@@ -9,6 +9,7 @@ import 'package:plate_pal/screens/scanner_screen.dart';
 import 'package:plate_pal/slide_from_bottom_route.dart';
 import 'package:plate_pal/data/meal_combo_data.dart';
 import 'package:collection/collection.dart';
+import 'package:plate_pal/data/mock_data.dart';
 
 class HealthScorePainter extends CustomPainter {
   final double animatedScore;
@@ -744,6 +745,27 @@ void _removePlate(String plateId) {
   }
 
   Widget _buildFloatingActionButton() {
+    // Determine if the "add" button should be shown and what plate to suggest
+    Plate? plateToSuggest;
+    bool canAdd = false;
+
+    // Check if current meal contains pancake and doesn't contain fruit
+    if (_currentMeal.plates.any((p) => p.id == pancakePlate.id) &&
+        !_currentMeal.plates.any((p) => p.id == fruitPlate.id)) {
+      plateToSuggest = fruitPlate;
+      canAdd = true;
+    }
+    // Check if current meal contains pasta and doesn't contain salad
+    else if (_currentMeal.plates.any((p) => p.id == pastaPlate.id) &&
+        !_currentMeal.plates.any((p) => p.id == saladPlate.id)) {
+      plateToSuggest = saladPlate;
+      canAdd = true;
+    }
+
+  /*  if (!canAdd) {
+      return const SizedBox.shrink(); // Don't show button if nothing can be added
+    }*/
+
     return Positioned(
       bottom: 30,
       left: 0,
@@ -753,19 +775,32 @@ void _removePlate(String plateId) {
           width: 80,
           height: 80,
           child: FloatingActionButton(
-            onPressed: () {
-  /*            Navigator.push(
+            onPressed: () async {
+              // Navigate to ScannerScreen in addPlate mode
+              final capturedPlate = await Navigator.push(
                 context,
                 SlideFromBottomRoute(
                   page: ScannerScreen(
-                    onMealCreated: (Meal createdMeal) {
-                      if (createdMeal.plates.isNotEmpty) {
-                        _addPlateToCurrentMeal(createdMeal.plates.first);
-                      }
+                    mode: ScannerMode.addPlate,
+                    suggestedPlateForCapture: plateToSuggest,
+                    // Pass current state values from the parent widget
+                    isTodayMealsEmpty: false, // Not relevant for adding to existing meal
+                    isPancakeMealDone: false, // Not relevant for adding to existing meal
+                    isPastaMealDone: false, // Not relevant for adding to existing meal
+                    hasAddedSaladToPasta: false, // Not relevant for adding to existing meal
+                    hasAddedFruitToPancake: false, // Not relevant for adding to existing meal
+                    onFlowCompleted: (Meal createdMeal, {required bool isPancakeMealDone, required bool isPastaMealDone, required bool hasAddedSaladToPasta, required bool hasAddedFruitToPancake}) {
+                      // This callback is not expected to be fully utilized in addPlate mode,
+                      // as we only care about the single plate returned.
+                      // However, to satisfy the non-nullable type, we provide an empty function.
                     },
                   ),
                 ),
-              );*/
+              );
+
+              if (capturedPlate != null && capturedPlate is Plate) {
+                _addPlateToCurrentMeal(capturedPlate);
+              }
             },
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,
