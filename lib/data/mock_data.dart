@@ -94,7 +94,7 @@ final Plate pancakePlate = Plate(
 
 final Plate fruitPlate = Plate(
   name: 'Mixed Fruit',
-  imageUrl: 'assets/images/fruit.jpg',
+  imageUrl: 'assets/images/fruits.jpg',
   calories: 120, 
   proteinGrams: 2, 
   carbsGrams: 30, 
@@ -164,11 +164,11 @@ Meal createPancakeMeal() {
   return Meal(
     name: 'Pancakes',
     time: '08:30',
-    accuracyPercentage: 92,
+    accuracyPercentage: 90,
     healthScore: 3,
     healthTip: "Use whole wheat flour for more fiber next time.",
     explainationHealth:
-        "This meal has a low score due to high carbohydrates and fats.",
+        "has too high carbohydrates and fats.",
     plates: [pancakePlate],
   );
 }
@@ -177,9 +177,9 @@ Meal createPancakeAndFruitMeal() {
   return Meal(
     name: 'Pancakes & Fruit',
     time: '08:30',
-    accuracyPercentage: 93,
+    accuracyPercentage: 90,
     healthScore: 6,
-    healthTip: "Great addition! The fruit adds vitamins and fiber.",
+    healthTip: "Great! The fruit adds vitamins and fiber.",
     explainationHealth: "because the fruit provides natural sugars and fiber, balancing the refined carbs of the pancakes.",
     plates: [pancakePlate, fruitPlate],
   );
@@ -189,11 +189,11 @@ Meal createFruitMeal() {
   return Meal(
     name: 'Fruit',
     time: '08:30',
-    accuracyPercentage: 92,
-    healthScore: 3,
-    healthTip: "Use whole wheat flour for more fiber next time.",
+    accuracyPercentage: 90,
+    healthScore: 8,
+    healthTip: "Add a protein source like yogurt or nuts to balance the meal.",
     explainationHealth:
-        "This meal has a low score due to high carbohydrates and fats.",
+        "due to the presence of natural sugars and fiber, but could benefit from more protein.",
     plates: [fruitPlate],
   );
 }
@@ -201,12 +201,12 @@ Meal createFruitMeal() {
 Meal createPastaMeal() {
   return Meal(
     name: 'Pasta',
-    time: '13:00',
-    accuracyPercentage: 88,
+    time: '13:45',
+    accuracyPercentage: 92,
     healthScore: 5,
     healthTip: "Add a side of vegetables to balance the meal.",
     explainationHealth:
-        "This meal is balanced but could use more micronutrients.",
+        "because it is balanced but could use more micronutrients.",
     plates: [pastaPlate],
   );
 }
@@ -214,11 +214,11 @@ Meal createPastaMeal() {
 Meal createSaladMeal() {
   return Meal(
     name: 'Salad',
-    time: '12:45',
-    accuracyPercentage: 95,
+    time: '13:45',
+    accuracyPercentage: 92,
     healthScore: 9,
     healthTip: "Great choice! This is a well-balanced and healthy meal.",
-    explainationHealth: "High in fiber and nutrients, a very healthy option.",
+    explainationHealth: "because it is high in fiber and nutrients, a very healthy option.",
     plates: [saladPlate],
   );
 }
@@ -226,12 +226,12 @@ Meal createSaladMeal() {
 Meal createPastaAndSaladMeal() {
   return Meal(
     name: 'Pasta & Salad',
-    time: '13:15',
-    accuracyPercentage: 90,
+    time: '13:45',
+    accuracyPercentage: 92,
     healthScore: 7,
     healthTip: "Good combination of carbs and greens.",
     explainationHealth:
-        "A balanced meal with good macro and micro-nutrient distribution.",
+        "because it is a balanced meal with good macro and micro-nutrient distribution.",
     plates: [pastaPlate, saladPlate],
   );
 }

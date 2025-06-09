@@ -303,6 +303,8 @@ class _PicturesScreenState extends State<PicturesScreen> {
                 child: Image.asset(
                   currentMainImagePath,
                   fit: BoxFit.cover,
+                  width: MediaQuery.of(context).size.width,   // Explicitly set width to screen width
+                  height: MediaQuery.of(context).size.height,  // Explicitly set height to screen height
                   key: ValueKey<String>(
                     currentMainImagePath,
                   ), // Unique key for AnimatedSwitcher
