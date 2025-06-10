@@ -344,7 +344,7 @@ void _removePlate(String plateId) {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Expanded(child: _buildPlatesList()),
+                  Expanded(child: _buildPlatesList(widget.selectedDay)),
                 ],
               ),
               _buildBottomFadeGradient(gradientEnd), // Gradient for the bottom
@@ -383,7 +383,7 @@ void _removePlate(String plateId) {
     );
   }
 
-  Widget _buildPlatesList() {
+  Widget _buildPlatesList(String day) {
     if (_currentMeal.plates.isEmpty) {
       return const Center(
         child: Padding(
@@ -396,8 +396,8 @@ void _removePlate(String plateId) {
       );
     }
     return ListView.builder(
-      padding: const EdgeInsets.only(
-        bottom: 60,
+      padding: EdgeInsets.only(
+        bottom: day == "Today" ? 120 : 60,
         top: 0,
       ), // Padding for the list
       itemCount: _currentMeal.plates.length,
@@ -763,7 +763,7 @@ void _removePlate(String plateId) {
     }
 
     if (!canAdd) {
-      return const SizedBox.shrink(); // Don't show button if nothing can be added
+    //  return const SizedBox.shrink(); // Don't show button if nothing can be added
     }
 
     return Positioned(

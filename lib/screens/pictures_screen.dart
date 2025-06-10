@@ -34,6 +34,7 @@ class PicturesScreen extends StatefulWidget {
 
 class _PicturesScreenState extends State<PicturesScreen> {
   late List<String> _picturePaths;
+  late PageController _pageController;
   int _currentIndex = 0;
   bool _areInitialImagesPrecached = false;
 
@@ -51,6 +52,7 @@ class _PicturesScreenState extends State<PicturesScreen> {
     super.initState();
     _picturePaths = List.from(widget.initialPicturePaths);
     _currentIndex = 0;
+    _pageController = PageController(initialPage: _currentIndex);
   }
 
   @override
@@ -65,6 +67,12 @@ class _PicturesScreenState extends State<PicturesScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   void _deleteCurrentImage() {
     if (_picturePaths.isEmpty) return;
 
@@ -74,6 +82,10 @@ class _PicturesScreenState extends State<PicturesScreen> {
         Navigator.pop(context);
       } else if (_currentIndex >= _picturePaths.length) {
         _currentIndex = _picturePaths.length - 1;
+        _pageController.jumpToPage(_currentIndex);
+      }
+      if (_picturePaths.isEmpty) {
+        Navigator.pop(context);
       }
     });
   }
@@ -116,9 +128,13 @@ class _PicturesScreenState extends State<PicturesScreen> {
 
       // If a plate was captured (returned from ScannerScreen)
       if (capturedPlate != null && capturedPlate is Plate) {
+        // Precache the newly captured image before adding to list and updating UI
+        await precacheImage(AssetImage(capturedPlate.imageUrl), context);
+
         setState(() {
           _picturePaths.add(capturedPlate.imageUrl);
           _currentIndex = _picturePaths.length - 1;
+          _pageController.jumpToPage(_currentIndex);
         });
       }
     } else {
@@ -296,11 +312,6 @@ class _PicturesScreenState extends State<PicturesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final String currentMainImagePath =
-        _picturePaths.isNotEmpty
-            ? _picturePaths[_currentIndex]
-            : 'assets/images/placeholder.png';
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         // Makes status bar icons light
@@ -313,29 +324,34 @@ class _PicturesScreenState extends State<PicturesScreen> {
           fit: StackFit.expand,
           children: [
             if (_picturePaths.isNotEmpty)
-              AnimatedSwitcher(
-                // Optional: For smooth transitions
-                duration: const Duration(milliseconds: 300),
-                child: Image.asset(
-                  currentMainImagePath,
-                  fit: BoxFit.cover,
-                  width: MediaQuery.of(context).size.width,   // Explicitly set width to screen width
-                  height: MediaQuery.of(context).size.height,  // Explicitly set height to screen height
-                  key: ValueKey<String>(
-                    currentMainImagePath,
-                  ), // Unique key for AnimatedSwitcher
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[800],
-                      child: const Center(
-                        child: Text(
-                          'Error Loading Image',
-                          style: TextStyle(color: Colors.white),
+              PageView.builder(
+                controller: _pageController,
+                itemCount: _picturePaths.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final String imagePath = _picturePaths[index];
+                  return Image.asset(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[800],
+                        child: const Center(
+                          child: Text(
+                            'Error Loading Image',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  );
+                },
               )
             else
               Container(
@@ -484,6 +500,11 @@ class _PicturesScreenState extends State<PicturesScreen> {
                                     onTap: () {
                                       setState(() {
                                         _currentIndex = index;
+                                        _pageController.animateToPage(
+                                          index,
+                                          duration: const Duration(milliseconds: 300),
+                                          curve: Curves.easeInOut,
+                                        );
                                       });
                                     },
                                     onDelete: _deleteCurrentImage,

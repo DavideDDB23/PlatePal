@@ -91,13 +91,6 @@ final List<MealCombo> mealCombos = [
 
   MealCombo(
     plateNames: {pancakePlate.name, fruitPlate.name},
-    mealName: "Pancakes with Fruit",
-    healthTip: "The fruit makes this a much more balanced breakfast.",
-    explanation: "because the fiber and vitamins from the fruit complement the meal.",
-  ),
-
-  MealCombo(
-    plateNames: {pancakePlate.name, fruitPlate.name},
     mealName: "Pancakes & Fruit",
     healthTip: "The fruit makes this a much more balanced breakfast.",
     explanation: "because the fiber and vitamins from the fruit complement the meal.",
@@ -115,6 +108,27 @@ final List<MealCombo> mealCombos = [
     mealName: "Pancakes",
     healthTip: "The fruit makes this a much more balanced breakfast.",
     explanation: "because the fiber and vitamins from the fruit complement the meal.",
+  ),
+
+  MealCombo(
+    plateNames: {saladPlate.name, pastaPlate.name},
+    mealName: "Pasta & Salad",
+    healthTip: "Good combination of carbs and greens.",
+    explanation: "because it is a balanced meal with good macro and micro-nutrient distribution.",
+  ),
+
+  MealCombo(
+    plateNames: {saladPlate.name},
+    mealName: "Salad",
+    healthTip: "Great choice! This is a well-balanced and healthy meal.",
+    explanation: "because it is high in fiber and nutrients, a very healthy option.",
+  ),
+
+  MealCombo(
+    plateNames: {pastaPlate.name},
+    mealName: "Pasta",
+    healthTip: "Add a side of vegetables to balance the meal.",
+    explanation: "because it is balanced but could use more micronutrients.",
   ),
 ];
 
