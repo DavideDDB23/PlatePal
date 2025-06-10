@@ -188,7 +188,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
     // Precache the initial picture for PicturesScreen before navigating
     precacheImage(AssetImage(initialPicture[0]), context);
 
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       PageRouteBuilder(
         pageBuilder:
@@ -210,8 +210,20 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   hasAddedFruitToPancake: widget.hasAddedFruitToPancake,
                   isTodayMealsEmpty: widget.isTodayMealsEmpty,
                 ),
-        transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
+        transitionDuration: Duration.zero, // Instant transition when pushing
+        reverseTransitionDuration: const Duration(milliseconds: 300), // Slide down when popping
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(0.0, 1.0); // Start from bottom
+          const end = Offset.zero; // End at normal position
+          const curve = Curves.easeOutCubic; // Apply an easing curve
+
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
       ),
     );
   }
