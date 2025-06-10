@@ -10,6 +10,7 @@ import 'package:plate_pal/slide_from_bottom_route.dart';
 import 'package:plate_pal/data/meal_combo_data.dart';
 import 'package:collection/collection.dart';
 import 'package:plate_pal/data/mock_data.dart';
+import 'package:plate_pal/screens/not_implemented_screen.dart';
 
 class HealthScorePainter extends CustomPainter {
   final double animatedScore;
@@ -310,6 +311,35 @@ void _removePlate(String plateId) {
             statusBarIconBrightness: Brightness.dark,
             statusBarBrightness: Brightness.light,
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const NotImplementedScreen()),
+                  );
+                },
+                customBorder: const CircleBorder(),
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  alignment: Alignment.center,
+                  child: SvgPicture.asset(
+                    'assets/icons/bin.svg',
+                    height: 30,
+                    width: 34,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.primaryText,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         body: Container(
           decoration: const BoxDecoration(
