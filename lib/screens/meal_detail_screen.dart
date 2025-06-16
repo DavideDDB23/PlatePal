@@ -11,6 +11,8 @@ import 'package:plate_pal/data/meal_combo_data.dart';
 import 'package:collection/collection.dart';
 import 'package:plate_pal/data/mock_data.dart';
 import 'package:plate_pal/screens/not_implemented_screen.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 
 class HealthScorePainter extends CustomPainter {
   final double animatedScore;
@@ -838,10 +840,14 @@ void _removePlate(String plateId) {
                   }
                 : () {
                     // Show SnackBar when no plate can be added
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content:
-                              Text("No more plates can be added for this meal.")),
+                    showTopSnackBar(
+                      Overlay.of(context),
+                      CustomSnackBar.info(
+                        message: "No more plates can be added for this meal.",
+                      ),
+                      animationDuration: const Duration(milliseconds: 1000),
+                      reverseAnimationDuration: const Duration(milliseconds: 300),
+                      displayDuration: const Duration(milliseconds: 1000),
                     );
                   },
             backgroundColor: Colors.black,

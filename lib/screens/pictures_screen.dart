@@ -6,6 +6,8 @@ import 'package:plate_pal/data/mock_data.dart';
 import 'package:plate_pal/models/meal_model.dart';
 import 'package:plate_pal/models/plate_model.dart';
 import 'package:plate_pal/screens/scanner_screen.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 
 class PicturesScreen extends StatefulWidget {
   final List<String> initialPicturePaths;
@@ -135,8 +137,15 @@ class _PicturesScreenState extends State<PicturesScreen> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No more plates can be added for this meal.")),
+      // Show SnackBar when no more plates can be added
+      showTopSnackBar(
+        Overlay.of(context),
+        CustomSnackBar.info(
+          message: "No more plates can be added for this meal.",
+        ),
+        animationDuration: const Duration(milliseconds: 1000),
+        reverseAnimationDuration: const Duration(milliseconds: 300),
+        displayDuration: const Duration(milliseconds: 1000),
       );
     }
   }
