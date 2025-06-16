@@ -84,9 +84,6 @@ class _PicturesScreenState extends State<PicturesScreen> {
         _currentIndex = _picturePaths.length - 1;
         _pageController.jumpToPage(_currentIndex);
       }
-      if (_picturePaths.isEmpty) {
-        Navigator.pop(context);
-      }
     });
   }
 

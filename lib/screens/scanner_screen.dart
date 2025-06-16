@@ -188,7 +188,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
     // Precache the initial picture for PicturesScreen before navigating
     precacheImage(AssetImage(initialPicture[0]), context);
 
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder:
@@ -211,7 +211,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   isTodayMealsEmpty: widget.isTodayMealsEmpty,
                 ),
         transitionDuration: Duration.zero, // Instant transition when pushing
-        reverseTransitionDuration: const Duration(milliseconds: 300), // Slide down when popping
+        reverseTransitionDuration: Duration.zero, // Instant transition when popping
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(0.0, 1.0); // Start from bottom
           const end = Offset.zero; // End at normal position
