@@ -143,14 +143,16 @@ class _PicturesScreenState extends State<PicturesScreen> {
 
   void _done() {
     if (_picturePaths.isEmpty) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      // If no pictures, signify that the flow was cancelled.
+      // ScannerScreen will receive this and just pop itself.
+      Navigator.pop(context, {'flowCancelled': true});
       return;
     }
 
     Meal finalMeal;
     bool updatedIsPancakeMealDone = widget.isPancakeMealDone;
     bool updatedIsPastaMealDone = widget.isPastaMealDone;
-    bool updatedHasAddedSaladToPasta = widget.hasAddedSaladToPasta;
+    bool updatedHasAddedSaladToPasta = false;
     bool updatedHasAddedFruitToPancake = false;
 
     Set<Plate> finalPlates = _picturePaths
@@ -193,13 +195,15 @@ class _PicturesScreenState extends State<PicturesScreen> {
           explainationHealth: "Explanation for this plate.",
         );
       } else {
-        // If for some reason finalPlates is empty here, return
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        // This case should be handled by _picturePaths.isEmpty check at the beginning
+        // If somehow reached here with empty plates, cancel the flow
+        Navigator.pop(context, {'flowCancelled': true});
         return;
       }
     }
 
-    // Call the callback with the created meal and updated state
+    // Call the callback to update HomeScreen's state.
+    // HomeScreen's onFlowCompleted will now ONLY update state, not popUntil.
     widget.onFlowCompleted(
       finalMeal,
       isPancakeMealDone: updatedIsPancakeMealDone,
@@ -208,8 +212,11 @@ class _PicturesScreenState extends State<PicturesScreen> {
       hasAddedFruitToPancake: updatedHasAddedFruitToPancake,
     );
 
-    // Close the entire flow and return to HomeScreen
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    // Pop PicturesScreen, returning data to ScannerScreen for final UI update and pop
+    Navigator.pop(context, {
+      'flowCompleted': true, // Indicate successful meal creation flow completion
+      'finalImagePath': _picturePaths[_currentIndex],
+    });
   }
 
   void _showScannerHelpInfo(BuildContext context) {

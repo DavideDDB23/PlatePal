@@ -38,7 +38,9 @@ class ScannerScreen extends StatefulWidget {
 
 class _ScannerScreenState extends State<ScannerScreen> {
   bool _isFlashOn = false;
-  bool _isBackgroundImagePrecached = false; // New flag
+  bool _isBackgroundImagePrecached = false;
+  bool _isFinalizingFlow = false; // New state variable
+  String? _finalizingImagePath; // New state variable
 
   @override
   void initState() {
@@ -56,6 +58,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
   }
 
   String _getBackgroundImagePath() {
+    if (_isFinalizingFlow && _finalizingImagePath != null) {
+      return _finalizingImagePath!; // Use the image from PicturesScreen
+    }
     if (widget.mode == ScannerMode.addPlate && widget.suggestedPlateForCapture != null) {
       return widget.suggestedPlateForCapture!.imageUrl;
     }
@@ -165,7 +170,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
   }
 
-  void _onCapture() {
+  void _onCapture() async {
     if (widget.mode == ScannerMode.addPlate && widget.suggestedPlateForCapture != null) {
       // In addPlate mode, pop and return the captured plate
       Navigator.of(context).pop(widget.suggestedPlateForCapture);
@@ -173,22 +178,15 @@ class _ScannerScreenState extends State<ScannerScreen> {
     }
 
     // Original logic for createMeal mode
-    String imageToUse;
-    if (widget.isTodayMealsEmpty) {
-      imageToUse = pancakePlate.imageUrl;
-    } else if (widget.isPancakeMealDone && !widget.isPastaMealDone) {
-      imageToUse = pastaPlate.imageUrl;
-    } else {
-      // Default or other conditions if any
-      imageToUse = pancakePlate.imageUrl; // Fallback
-    }
+    String imageToUse = _getBackgroundImagePath(); // Get the initial image path for the scanner
 
     final List<String> initialPicture = [imageToUse];
 
     // Precache the initial picture for PicturesScreen before navigating
     precacheImage(AssetImage(initialPicture[0]), context);
 
-    Navigator.push(
+    // Await the result from PicturesScreen
+    final result = await Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder:
@@ -196,6 +194,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 PicturesScreen(
                   initialPicturePaths: initialPicture,
                   onFlowCompleted: (Meal createdMeal, {required bool isPancakeMealDone, required bool isPastaMealDone, required bool hasAddedSaladToPasta, required bool hasAddedFruitToPancake}) {
+                    // This callback updates the HomeScreen state only.
+                    // ScannerScreen is now responsible for popping itself back to HomeScreen.
                     widget.onFlowCompleted!(
                       createdMeal,
                       isPancakeMealDone: isPancakeMealDone,
@@ -226,6 +226,21 @@ class _ScannerScreenState extends State<ScannerScreen> {
         },
       ),
     );
+
+    // Handle the result from PicturesScreen after it's popped
+    if (result is Map<String, dynamic>) {
+      if (result['flowCompleted'] == true) {
+        setState(() {
+          _isFinalizingFlow = true;
+          _finalizingImagePath = result['finalImagePath'];
+        });
+        // Give a tiny moment for UI to update before popping ScannerScreen
+        await Future.delayed(const Duration(milliseconds: 50));
+        Navigator.of(context).pop(); // Pop ScannerScreen
+      } else if (result['flowCancelled'] == true) {
+        Navigator.of(context).pop(); // PicturesScreen was closed without completing meal
+      }
+    }
   }
 
   @override
@@ -320,16 +335,18 @@ class _ScannerScreenState extends State<ScannerScreen> {
                             scale: 0.6,
                             alignment: Alignment.center,
                             child: SvgPicture.asset(
-                              'assets/icons/close_2.svg',
+                              _isFinalizingFlow
+                                  ? 'assets/icons/back.svg' // Change to back.svg
+                                  : 'assets/icons/close_2.svg', // Keep close_2.svg otherwise
                               height: 20,
                               width: 20,
                             ),
                           ),
                         ),
                       ),
-                      const Text(
-                        'Scanner',
-                        style: TextStyle(
+                      Text(
+                        _isFinalizingFlow ? 'Pictures' : 'Scanner', // Change title based on mode
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
@@ -371,66 +388,69 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 ),
               ),
             ),
-            Center(
-              child: SvgPicture.asset(
-                'assets/icons/frame.svg',
-                fit: BoxFit.contain,
+            // Frame (conditionally hidden)
+            if (!_isFinalizingFlow) // Hide frame when finalizing
+              Center(
+                child: SvgPicture.asset(
+                  'assets/icons/frame.svg',
+                  fit: BoxFit.contain,
+                ),
               ),
-            ),
 
-            // Bottom Controls (Flash, Capture)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 30.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _buildCircularIconButton(
-                        icon: _isFlashOn ? Icons.flash_on : Icons.flash_off,
-                        iconColor: Colors.black,
-                        onPressed: () {
-                          setState(() {
-                            _isFlashOn = !_isFlashOn;
-                          });
-                        },
-                        iconSize: 24,
-                        padding: 10,
-                      ),
-                      GestureDetector(
-                        onTap: _onCapture,
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          padding: const EdgeInsets.all(
-                            3.5,
-                          ), // Space for the outer border
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3.5),
-                          ),
+            // Bottom Controls (Flash, Capture - conditionally hidden)
+            if (!_isFinalizingFlow) // Hide buttons when finalizing
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 30.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildCircularIconButton(
+                          icon: _isFlashOn ? Icons.flash_on : Icons.flash_off,
+                          iconColor: Colors.black,
+                          onPressed: () {
+                            setState(() {
+                              _isFlashOn = !_isFlashOn;
+                            });
+                          },
+                          iconSize: 24,
+                          padding: 10,
+                        ),
+                        GestureDetector(
+                          onTap: _onCapture,
                           child: Container(
-                            // Inner white circle
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
+                            width: 80,
+                            height: 80,
+                            padding: const EdgeInsets.all(
+                              3.5,
+                            ), // Space for the outer border
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 3.5),
+                            ),
+                            child: Container(
+                              // Inner white circle
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 24 + 10 * 2,
-                      ), // Spacer to balance row (iconSize + padding*2)
-                    ],
+                        SizedBox(
+                          width: 24 + 10 * 2,
+                        ), // Spacer to balance row (iconSize + padding*2)
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

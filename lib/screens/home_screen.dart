@@ -367,7 +367,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
               await precacheImage(AssetImage(scannerInitialImagePath), context);
 
-              Navigator.push(
+              // Await the result from ScannerScreen (which will now pop itself)
+              await Navigator.push(
                 context,
                 SlideFromBottomRoute(
                   page: ScannerScreen(
@@ -379,6 +380,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         _hasAddedSaladToPasta = hasAddedSaladToPasta;
                         _hasAddedFruitToPancake = hasAddedFruitToPancake;
                       });
+                      // IMPORTANT: Do NOT call Navigator.popUntil here.
+                      // ScannerScreen will handle its own pop.
                     },
                     isTodayMealsEmpty: _todayMeals.isEmpty,
                     isPancakeMealDone: _isPancakeMealDone,
@@ -389,6 +392,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               );
+              // After await, ScannerScreen has popped, and HomeScreen is now visible.
+              // No further pop action needed in HomeScreen.
             },
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,
