@@ -805,37 +805,45 @@ void _removePlate(String plateId) {
           width: 80,
           height: 80,
           child: FloatingActionButton(
-            onPressed: () async { // Made onPressed async
-              if (plateToSuggest != null) {
-                await precacheImage(AssetImage(plateToSuggest.imageUrl), context); // Precache the suggested plate image
-              }
+            onPressed: canAdd
+                ? () async {
+                    // Original logic for adding a plate
+                    if (plateToSuggest != null) {
+                      await precacheImage(AssetImage(plateToSuggest.imageUrl), context);
+                    }
 
-              // Navigate to ScannerScreen in addPlate mode
-              final capturedPlate = await Navigator.push(
-                context,
-                SlideFromBottomRoute(
-                  page: ScannerScreen(
-                    mode: ScannerMode.addPlate,
-                    suggestedPlateForCapture: plateToSuggest,
-                    // Pass current state values from the parent widget
-                    isTodayMealsEmpty: false, // Not relevant for adding to existing meal
-                    isPancakeMealDone: false, // Not relevant for adding to existing meal
-                    isPastaMealDone: false, // Not relevant for adding to existing meal
-                    hasAddedSaladToPasta: false, // Not relevant for adding to existing meal
-                    hasAddedFruitToPancake: false, // Not relevant for adding to existing meal
-                    onFlowCompleted: (Meal createdMeal, {required bool isPancakeMealDone, required bool isPastaMealDone, required bool hasAddedSaladToPasta, required bool hasAddedFruitToPancake}) {
-                      // This callback is not expected to be fully utilized in addPlate mode,
-                      // as we only care about the single plate returned.
-                      // However, to satisfy the non-nullable type, we provide an empty function.
-                    },
-                  ),
-                ),
-              );
+                    final capturedPlate = await Navigator.push(
+                      context,
+                      SlideFromBottomRoute(
+                        page: ScannerScreen(
+                          mode: ScannerMode.addPlate,
+                          suggestedPlateForCapture: plateToSuggest,
+                          isTodayMealsEmpty: false,
+                          isPancakeMealDone: false,
+                          isPastaMealDone: false,
+                          hasAddedSaladToPasta: false,
+                          hasAddedFruitToPancake: false,
+                          onFlowCompleted: (Meal createdMeal, {required bool isPancakeMealDone, required bool isPastaMealDone, required bool hasAddedSaladToPasta, required bool hasAddedFruitToPancake}) {
+                            // This callback is not expected to be fully utilized in addPlate mode,
+                            // as we only care about the single plate returned.
+                            // However, to satisfy the non-nullable type, we provide an empty function.
+                          },
+                        ),
+                      ),
+                    );
 
-              if (capturedPlate != null && capturedPlate is Plate) {
-                _addPlateToCurrentMeal(capturedPlate);
-              }
-            },
+                    if (capturedPlate != null && capturedPlate is Plate) {
+                      _addPlateToCurrentMeal(capturedPlate);
+                    }
+                  }
+                : () {
+                    // Show SnackBar when no plate can be added
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content:
+                              Text("No more plates can be added for this meal.")),
+                    );
+                  },
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,
             elevation: 3.0,
