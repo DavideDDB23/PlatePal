@@ -145,7 +145,7 @@ class _PicturesScreenState extends State<PicturesScreen> {
         ),
         animationDuration: const Duration(milliseconds: 1000),
         reverseAnimationDuration: const Duration(milliseconds: 300),
-        displayDuration: const Duration(milliseconds: 1000),
+        displayDuration: const Duration(milliseconds: 1500),
       );
     }
   }

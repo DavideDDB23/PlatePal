@@ -847,7 +847,7 @@ void _removePlate(String plateId) {
                       ),
                       animationDuration: const Duration(milliseconds: 1000),
                       reverseAnimationDuration: const Duration(milliseconds: 300),
-                      displayDuration: const Duration(milliseconds: 1000),
+                      displayDuration: const Duration(milliseconds: 1500),
                     );
                   },
             backgroundColor: Colors.black,
