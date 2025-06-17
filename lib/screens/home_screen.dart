@@ -22,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _selectedDay = 'Today';
   late ScrollController _scrollController;
+  late PageController _contentPageController;
 
   final List<Meal> _todayMeals = [];
 
@@ -44,12 +45,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _contentPageController = PageController(initialPage: _selectedDay == 'Today' ? 1 : 0);
     _updateSummary();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _contentPageController.dispose();
     super.dispose();
   }
 
@@ -118,22 +121,44 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildDaySelector(),
-                CalorieSummaryCard(
-                  totalKcal: _totalKcal,
-                  proteinGrams: _proteinGrams,
-                  carbsGrams: _carbsGrams,
-                  fatsGrams: _fatsGrams,
-                ),
-                _buildLoggedMealsTitle(),
                 Expanded(
-                  child: Stack(
-                    // Stack for list and bottom fade gradient
-                    children: [
-                      _buildMealListView(),
-                      _selectedDay == "Today"
-                          ? _buildBottomFadeGradientToday(gradientEnd)
-                          : _buildBottomFadeGradientYesterday(gradientEnd),
-                    ],
+                  child: PageView.builder(
+                    controller: _contentPageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 2,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _selectedDay = index == 1 ? 'Today' : 'Yesterday';
+                        _updateSummary();
+                        if (_scrollController.hasClients) {
+                          _scrollController.jumpTo(0.0);
+                        }
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CalorieSummaryCard(
+                            totalKcal: _totalKcal,
+                            proteinGrams: _proteinGrams,
+                            carbsGrams: _carbsGrams,
+                            fatsGrams: _fatsGrams,
+                          ),
+                          _buildLoggedMealsTitle(),
+                          Expanded(
+                            child: Stack(
+                              children: [
+                                _buildMealListView(),
+                                _selectedDay == "Today"
+                                    ? _buildBottomFadeGradientToday(gradientEnd)
+                                    : _buildBottomFadeGradientYesterday(gradientEnd),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ],
@@ -205,9 +230,9 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0),
       child: Row(
         children: [
-          _dayTogglePill('Today'),
-          const SizedBox(width: 10),
           _dayTogglePill('Yesterday'),
+          const SizedBox(width: 10),
+          _dayTogglePill('Today'),
         ],
       ),
     );
@@ -220,11 +245,16 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _selectedDay = day;
           _updateSummary();
-
-          if (_scrollController.hasClients) {
-            _scrollController.jumpTo(0.0); // Jump to the top
-          }
         });
+
+        int newPageIndex = day == 'Today' ? 1 : 0;
+        if (_contentPageController.hasClients && _contentPageController.page?.round() != newPageIndex) {
+          _contentPageController.animateToPage(
+            newPageIndex,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
